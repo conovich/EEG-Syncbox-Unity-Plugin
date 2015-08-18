@@ -15,6 +15,7 @@ extern "C" void toggleHandleLEDOn(HANDLE hDevice);
 extern "C" void toggleHandleLEDOff(HANDLE hDevice);
 extern "C" void SetFIOState(HANDLE hDevice, int port, int state);
 extern "C" int GetFIOState(HANDLE hDevice, int port);
+extern "C" void configTC(HANDLE hDevice, int TimerCounterPinOffset, int NumberOfTimersEnabled, long *aEnableTimers, long *aEnableCounters, int tc_base , float divisor, long *aTimerModes, double *aTimerValues);
 
 
 HANDLE hDevice;
@@ -100,6 +101,7 @@ const char* SyncPulse(float durationMilliseconds){
 }
 
 const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
+    
     doRelay = false;//doRelay = false?
     
     if(doRelay){
@@ -167,13 +169,13 @@ const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
      */
     
     if(freqHz < 7.8125 || freqHz > 50){ //if frequency is out of bounds
-        exit(0);
-        return ("FREQUENCY OUT OF BOUNDS.");
+        //exit(0);
+        return ("freqhz Out of Range, Must be within 7.8125 and 50 Hz.");
     }
     
     if(durationMilliseconds < 100 || durationMilliseconds > 20000){ //if duration is out of bounds
-        exit(0);
-        return ("DURATION OUT OF BOUNDS.");
+        //exit(0);
+        return ("Duration Out of Range, Must be between 100 and 20000 milliseconds");
     }
 
      

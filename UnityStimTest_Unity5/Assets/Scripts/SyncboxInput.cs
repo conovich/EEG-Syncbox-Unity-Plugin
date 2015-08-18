@@ -23,6 +23,10 @@ public class SyncboxInput : MonoBehaviour {
 	private static extern IntPtr TurnLEDOn();
 	[DllImport ("ASimplePlugin")]
 	private static extern IntPtr TurnLEDOff();
+	[DllImport ("ASimplePlugin")]
+	private static extern IntPtr SyncPulse(float durationMilliseconds);
+	[DllImport ("ASimplePlugin")]
+	private static extern IntPtr StimPulse(float durationMilliseconds, float freqHz, bool doRelay);
 	
 	public bool ShouldPulse = false;
 	public float PulseIntervalSeconds;
@@ -58,6 +62,10 @@ public class SyncboxInput : MonoBehaviour {
 		else{
 			ToggleOff ();
 		}
+		if(Input.GetKeyDown(KeyCode.S)){
+			//SetSyncPulse();
+			SetStimPulse();
+		}
 	}
 
 	void ToggleOn(){
@@ -74,6 +82,14 @@ public class SyncboxInput : MonoBehaviour {
 			Debug.Log(Marshal.PtrToStringAuto (TurnLEDOff()));
 		}
 		isToggledOn = false;
+	}
+
+	void SetSyncPulse(){
+		Debug.Log(Marshal.PtrToStringAuto (SyncPulse(1000.0f)));
+	}
+
+	void SetStimPulse(){
+		Debug.Log(Marshal.PtrToStringAuto (StimPulse (1000.0f, 10, false)));
 	}
 
 	IEnumerator Pulse (){
@@ -94,24 +110,4 @@ public class SyncboxInput : MonoBehaviour {
 		Debug.Log(Marshal.PtrToStringAuto (CloseUSB()));
 	}
 
-	/*
-	//Lets make our calls from the Plugin
-	[DllImport ("ASimplePlugin")]
-	private static extern int PrintANumber();
-	
-	[DllImport ("ASimplePlugin")]
-	private static extern IntPtr PrintHello();
-	
-	[DllImport ("ASimplePlugin")]
-	private static extern int AddTwoIntegers(int i1,int i2);
-	
-	[DllImport ("ASimplePlugin")]
-	private static extern float AddTwoFloats(float f1,float f2);	
-	
-	void Start () {
-		Debug.Log(PrintANumber());
-		Debug.Log(Marshal.PtrToStringAuto (PrintHello()));
-		Debug.Log(AddTwoIntegers(2,2));
-		Debug.Log(AddTwoFloats(2.5F,4F));
-	}*/
 }
