@@ -1,0 +1,18 @@
+#include "u3.h"
+
+
+extern "C" {
+    //TEST FUNCTIONS
+	const char* PrintHello ();
+	int PrintANumber ();
+	int AddTwoIntegers(int, int);
+	float AddTwoFloats(float, float);
+    
+    //LABJACK FUNCTIONS
+    const char* OpenUSB();
+    const char* CloseUSB();
+    const char* TurnLEDOn();
+    const char* TurnLEDOff();
+    const char* SyncPulse(float durationMilliseconds);
+    const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay);
+}

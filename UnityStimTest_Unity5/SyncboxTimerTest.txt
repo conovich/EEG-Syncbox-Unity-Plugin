@@ -1,0 +1,13 @@
+
+Sync Pulse On: 0
+Sync Pulse Off: 11
+Sync Pulse On: 1001
+Sync Pulse Off: 11
+Sync Pulse On: 1001
+Sync Pulse Off: 11
+Sync Pulse On: 1001
+Sync Pulse Off: 11
+Sync Pulse On: 1001
+Sync Pulse Off: 11
+Sync Pulse On: 1001
+Sync Pulse Off: 11
