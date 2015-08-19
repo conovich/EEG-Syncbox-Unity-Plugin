@@ -24,9 +24,9 @@ public class SyncboxInput : MonoBehaviour {
 	[DllImport ("ASimplePlugin")]
 	private static extern IntPtr TurnLEDOff();
 	[DllImport ("ASimplePlugin")]
-	private static extern IntPtr SyncPulse(float durationMilliseconds);
+	private static extern IntPtr SyncPulse(float durationSeconds);
 	[DllImport ("ASimplePlugin")]
-	private static extern IntPtr StimPulse(float durationMilliseconds, float freqHz, bool doRelay);
+	private static extern IntPtr StimPulse(float durationSeconds, float freqHz, bool doRelay);
 	
 	public bool ShouldPulse = false;
 	public float PulseIntervalSeconds;
@@ -85,11 +85,11 @@ public class SyncboxInput : MonoBehaviour {
 	}
 
 	void SetSyncPulse(){
-		Debug.Log(Marshal.PtrToStringAuto (SyncPulse(1000.0f)));
+		Debug.Log(Marshal.PtrToStringAuto (SyncPulse(1.0f)));
 	}
 
 	void SetStimPulse(){
-		Debug.Log(Marshal.PtrToStringAuto (StimPulse (1000.0f, 10, false)));
+		Debug.Log(Marshal.PtrToStringAuto (StimPulse (1.0f, 10, false)));
 	}
 
 	IEnumerator Pulse (){

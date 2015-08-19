@@ -93,14 +93,14 @@ const char* TurnLEDOff(){
     return "No device to turn off LED.";
 }
 
-const char* SyncPulse(float durationMilliseconds){
+const char* SyncPulse(float durationSeconds){
     
     
     
     return "finished sync pulse!";
 }
 
-const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
+const char* StimPulse(float durationSeconds, float freqHz, bool doRelay){
     
     doRelay = false;//doRelay = false?
     
@@ -124,7 +124,7 @@ const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
     int timerVal = (int)(0.5f * clock_rate / freqHz);
     double timerValDouble = (double)timerVal;
     
-    int numCycles = (int)(round(durationMilliseconds * freqHz));
+    int numCycles = (int)(round(durationSeconds * freqHz));
     
     /*
      84          # Set the timer clock base and divisor
@@ -173,7 +173,7 @@ const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
         return ("freqhz Out of Range, Must be within 7.8125 and 50 Hz.");
     }
     
-    if(durationMilliseconds < 100 || durationMilliseconds > 20000){ //if duration is out of bounds
+    if(durationSeconds < .1f || durationSeconds > 20.0f){ //if duration is out of bounds
         //exit(0);
         return ("Duration Out of Range, Must be between 100 and 20000 milliseconds");
     }
@@ -252,7 +252,7 @@ const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay){
     //aTimerValues = An array where each element specifies the initial value for
     //               that timer.  For the U3, this array must always have at least
     //               2 elements.
-    double aTimerValues[2] = {timerValDouble,timerValDouble};
+    double aTimerValues[2] = {timerValDouble,numCycles};
     
     
     configTC(hDevice, TimerCounterPinOffset, NumberOfTimersEnabled, aEnableTimers, aEnableCounters, tc_base, divisor, aTimerModes, aTimerValues);
