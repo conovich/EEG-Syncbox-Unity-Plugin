@@ -13,6 +13,6 @@ extern "C" {
     const char* CloseUSB();
     const char* TurnLEDOn();
     const char* TurnLEDOff();
-    const char* SyncPulse(float durationMilliseconds);
+    float SyncPulse();
     const char* StimPulse(float durationMilliseconds, float freqHz, bool doRelay);
 }

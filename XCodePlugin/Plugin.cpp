@@ -4,6 +4,8 @@
 
 #include "Plugin.pch"
 #include "u3Extended.h"
+#include <cstdlib> //for random()
+#include <unistd.h> //for usleep(microseconds)
 
 //labjackusb
 extern "C" float LJUSB_GetLibraryVersion();
@@ -11,8 +13,8 @@ extern "C" float LJUSB_GetLibraryVersion();
 //u3Extended.c
 extern "C" HANDLE openUSB(int ID);
 extern "C" void closeUSB(HANDLE hDevice);
-extern "C" void toggleHandleLEDOn(HANDLE hDevice);
-extern "C" void toggleHandleLEDOff(HANDLE hDevice);
+extern "C" void toggleHandleLEDOn(HANDLE hDevice, int channel);
+extern "C" void toggleHandleLEDOff(HANDLE hDevice, int channel);
 extern "C" void SetFIOState(HANDLE hDevice, int port, int state);
 extern "C" int GetFIOState(HANDLE hDevice, int port);
 extern "C" void configTC(HANDLE hDevice, int TimerCounterPinOffset, int NumberOfTimersEnabled, long *aEnableTimers, long *aEnableCounters, int tc_base , float divisor, long *aTimerModes, double *aTimerValues);
@@ -21,6 +23,11 @@ extern "C" void configTC(HANDLE hDevice, int TimerCounterPinOffset, int NumberOf
 HANDLE hDevice;
 bool isDeviceOpen = false;
 bool isLightOn = false;
+int stimChannel = 4;
+int syncChannel = 0;
+//random seed must be set once during the duration of the program
+//random is used in sync pulse for time jitter
+bool isRandomSeedSet = false;
 
 
 const char* PrintHello(){
@@ -77,7 +84,7 @@ const char* CloseUSB(){
 
 const char* TurnLEDOn(){
     if(isDeviceOpen){
-        toggleHandleLEDOn(hDevice);
+        toggleHandleLEDOn(hDevice, stimChannel);
         return "Light On!";
     }
     return "No device to turn on LED.";
@@ -87,7 +94,7 @@ const char* TurnLEDOn(){
 
 const char* TurnLEDOff(){
     if(isDeviceOpen){
-        toggleHandleLEDOff(hDevice);
+        toggleHandleLEDOff(hDevice, stimChannel);
         return "Light Off!";
     }
     return "No device to turn off LED.";
@@ -95,47 +102,44 @@ const char* TurnLEDOff(){
 
 
 //ex: a 10 ms pulse every second — until the duration is over...
-const char* SyncPulse(float durationSeconds, float dutyCycle, float freqHz){
-    //duty cycle: 50% = half on, half off, 10% = 10% on, 90% off
-    
-    float divisor = 250.0f;
-    
-    float clock_rate = 10000000.0f/divisor;
-    
-    int timerVal = (int)(0.5f * clock_rate / freqHz);
-    double timerValDouble = (double)timerVal;
-    
-    int numCycles = (int)(round(durationSeconds * freqHz));
-    
-    
-    int tc_base = 3; //48Mhz Clock
-    
-    if(freqHz < 7.8125 || freqHz > 50){ //if frequency is out of bounds
-        //exit(0);
-        return ("freqhz Out of Range, Must be within 7.8125 and 50 Hz.");
+float SyncPulse(){
+    if(!isRandomSeedSet){
+        //set random seed
+        srand (static_cast <unsigned> (time(0)));
+        isRandomSeedSet = true;
     }
     
-    if(durationSeconds < .1f || durationSeconds > 20.0f){ //if duration is out of bounds
-        //exit(0);
-        return ("Duration Out of Range, Must be between .1 and 20 seconds");
+    float pulseTimeSeconds = 0.5f; //TODO: make this a parameter???
+    int pulseTimeMilliseconds = (int)(pulseTimeSeconds*1000);
+    float maxTimeToWait = 1.0f - pulseTimeSeconds;
+    
+    float timeBeforePulseSeconds = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/maxTimeToWait); //creates a random float between 0.0f and maxTimeToWait
+    unsigned int timeBeforePulseMilliseconds = (int)(timeBeforePulseSeconds*1000);
+    
+    unsigned int microseconds = timeBeforePulseMilliseconds*1000;
+    usleep(microseconds); //sleep for the random time to wait before the pulse
+    
+    
+    //turn on pulse
+    if(isDeviceOpen){
+        toggleHandleLEDOn(hDevice, syncChannel);
     }
     
+    //sleep for pulselength
+    microseconds = pulseTimeMilliseconds*1000;
+    usleep(microseconds); //sleep for the random time to wait before the pulse
     
-    /*
-     117          # Set the timer/counter pin offset to 4, which will put the first
-     118          # timer/counter on FIO4 and the second on FIO5.
-     */
+    //turn off pulse
+    if(isDeviceOpen){
+        toggleHandleLEDOff(hDevice, syncChannel);
+    }
     
-    int TimerCounterPinOffset = 4;
-    long EnableCounter1 = 1;
-    long EnableCounter0 = 0;
-    int NumberOfTimersEnabled = 2;
+    //#include <chrono>
+    // ...
+    //using namespace std::chrono;
+    //long currentTimeMS = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
     
-    
-    //do I still need two timers for sync pulsing? what is the difference between sync and stim besides a duty cycle?
-    
-    
-    return "finished sync pulse!";
+    return timeBeforePulseSeconds;
 }
 
 const char* StimPulse(float durationSeconds, float freqHz, bool doRelay){

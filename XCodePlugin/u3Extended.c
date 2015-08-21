@@ -26,40 +26,60 @@ void closeUSB(HANDLE hDevice){
     closeUSBConnection(hDevice);
 }
 
-void toggleHandleLEDOn(HANDLE hDevice){
+void toggleSyncBitOn(HANDLE hDevice){
     long error;
     
     //Read state of FIO4
     printf("\nCalling eDI to read the state of FIO4\n");
     long lngState;
-    if((error = eDI(hDevice, 1, 4, &lngState)) != 0)
-        goto end;
+    if((error = eDI(hDevice, 1, 4, &lngState)) != 0) //long eDI(HANDLE Handle, long ConfigIO, long Channel, long *State)
+    goto end;
     printf("FIO4 state = %ld\n", lngState);
     
     //Toggle FIO4
     printf("\nCalling eDO to toggle FIO4\n");
     if((error = eDO(hDevice, 1, 4, !lngState)) != 0) //apparently setting the opposite lngState always turns it on? weird.
-        goto end;
+    goto end;
     
-end:
-    if(error > 0)
-        printf("Received an error code of %ld\n", error);
-    
+    end:
+        if(error > 0)
+            printf("Received an error code of %ld\n", error);
 }
 
-void toggleHandleLEDOff(HANDLE hDevice){
+void toggleHandleLEDOn(HANDLE hDevice, int channel){
     long error;
     
     //Read state of FIO4
     printf("\nCalling eDI to read the state of FIO4\n");
     long lngState;
-    if((error = eDI(hDevice, 1, 4, &lngState)) != 0)
+    if((error = eDI(hDevice, 1, channel, &lngState)) != 0)
         goto end;
     printf("FIO4 state = %ld\n", lngState);
     
     //Toggle FIO4
     printf("\nCalling eDO to toggle FIO4\n");
-    if((error = eDO(hDevice, 1, 4, lngState)) != 0) //apparently keeping the same lngState turns it off. weird.
+    if((error = eDO(hDevice, 1, channel, !lngState)) != 0) //apparently setting the opposite lngState always turns it on? weird.
+        goto end;
+    
+    end:
+        if(error > 0)
+            printf("Received an error code of %ld\n", error);
+    
+}
+
+void toggleHandleLEDOff(HANDLE hDevice, int channel){
+    long error;
+    
+    //Read state of FIO4
+    printf("\nCalling eDI to read the state of FIO4\n");
+    long lngState;
+    if((error = eDI(hDevice, 1, channel, &lngState)) != 0)
+        goto end;
+    printf("FIO4 state = %ld\n", lngState);
+    
+    //Toggle FIO4
+    printf("\nCalling eDO to toggle FIO4\n");
+    if((error = eDO(hDevice, 1, channel, lngState)) != 0) //apparently keeping the same lngState turns it off. weird.
         goto end;
     
 end:

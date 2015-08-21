@@ -21,8 +21,8 @@ extern "C"{
     
     HANDLE openUSB(int ID);
     void closeUSB(HANDLE h);
-    void toggleHandleLEDOn(HANDLE h);
-    void toggleHandleLEDOff(HANDLE h);
+    void toggleHandleLEDOn(HANDLE h, int channel);
+    void toggleHandleLEDOff(HANDLE h, int channel);
     void SetFIOState(HANDLE hDevice, int port, int state);
     int GetFIOState(HANDLE hDevice, int port);
     void configIO(HANDLE hDevice, int TimerCounterPinOffset, bool EnableCounter1, bool EnableCounter0, int NumberOfTimersEnabled, int FIOAnalog, int EIOAnalog, bool EnableUART);

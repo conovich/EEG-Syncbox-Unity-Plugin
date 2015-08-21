@@ -24,7 +24,7 @@ public class SyncboxInput : MonoBehaviour {
 	[DllImport ("ASimplePlugin")]
 	private static extern IntPtr TurnLEDOff();
 	[DllImport ("ASimplePlugin")]
-	private static extern IntPtr SyncPulse(float durationSeconds);
+	private static extern float SyncPulse();
 	[DllImport ("ASimplePlugin")]
 	private static extern IntPtr StimPulse(float durationSeconds, float freqHz, bool doRelay);
 	
@@ -63,8 +63,8 @@ public class SyncboxInput : MonoBehaviour {
 			ToggleOff ();
 		}
 		if(Input.GetKeyDown(KeyCode.S)){
-			//SetSyncPulse();
-			SetStimPulse();
+			SetSyncPulse();
+			//SetStimPulse();
 		}
 	}
 
@@ -86,7 +86,8 @@ public class SyncboxInput : MonoBehaviour {
 
 	//ex: a 10 ms pulse every second — until the duration is over...
 	void SetSyncPulse(){
-		Debug.Log(Marshal.PtrToStringAuto (SyncPulse(1.0f)));
+		//Debug.Log(Marshal.PtrToStringAuto (SyncPulse()));
+		Debug.Log (SyncPulse ());
 	}
 
 	void SetStimPulse(){
