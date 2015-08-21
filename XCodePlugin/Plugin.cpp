@@ -93,8 +93,46 @@ const char* TurnLEDOff(){
     return "No device to turn off LED.";
 }
 
-const char* SyncPulse(float durationSeconds){
+
+//ex: a 10 ms pulse every second — until the duration is over...
+const char* SyncPulse(float durationSeconds, float dutyCycle, float freqHz){
+    //duty cycle: 50% = half on, half off, 10% = 10% on, 90% off
     
+    float divisor = 250.0f;
+    
+    float clock_rate = 10000000.0f/divisor;
+    
+    int timerVal = (int)(0.5f * clock_rate / freqHz);
+    double timerValDouble = (double)timerVal;
+    
+    int numCycles = (int)(round(durationSeconds * freqHz));
+    
+    
+    int tc_base = 3; //48Mhz Clock
+    
+    if(freqHz < 7.8125 || freqHz > 50){ //if frequency is out of bounds
+        //exit(0);
+        return ("freqhz Out of Range, Must be within 7.8125 and 50 Hz.");
+    }
+    
+    if(durationSeconds < .1f || durationSeconds > 20.0f){ //if duration is out of bounds
+        //exit(0);
+        return ("Duration Out of Range, Must be between .1 and 20 seconds");
+    }
+    
+    
+    /*
+     117          # Set the timer/counter pin offset to 4, which will put the first
+     118          # timer/counter on FIO4 and the second on FIO5.
+     */
+    
+    int TimerCounterPinOffset = 4;
+    long EnableCounter1 = 1;
+    long EnableCounter0 = 0;
+    int NumberOfTimersEnabled = 2;
+    
+    
+    //do I still need two timers for sync pulsing? what is the difference between sync and stim besides a duty cycle?
     
     
     return "finished sync pulse!";
@@ -175,7 +213,7 @@ const char* StimPulse(float durationSeconds, float freqHz, bool doRelay){
     
     if(durationSeconds < .1f || durationSeconds > 20.0f){ //if duration is out of bounds
         //exit(0);
-        return ("Duration Out of Range, Must be between 100 and 20000 milliseconds");
+        return ("Duration Out of Range, Must be between .1 and 20 seconds");
     }
 
      

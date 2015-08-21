@@ -84,6 +84,7 @@ public class SyncboxInput : MonoBehaviour {
 		isToggledOn = false;
 	}
 
+	//ex: a 10 ms pulse every second — until the duration is over...
 	void SetSyncPulse(){
 		Debug.Log(Marshal.PtrToStringAuto (SyncPulse(1.0f)));
 	}
