@@ -19,13 +19,3 @@
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
-
-*.bin
-
-*.log
-
-*.info
-
-UnityStimTest_Unity5/Library/ProjectSettings.asset
-
-UnityStimTest_Unity5/Library/MonoManager.asset
