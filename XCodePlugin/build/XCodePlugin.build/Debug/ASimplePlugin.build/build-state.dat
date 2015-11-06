@@ -1,168 +1,0 @@
-TASimplePlugin
-v7
-r0
-t448561726.669196
-cCheck dependencies
-cProcessInfoPlistFile "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/Info.plist" ASimplePlugin-Info.plist
-cProcessPCH++ /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h.gch /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h normal x86_64 c++ com.apple.compilers.gcc.4_2
-cCompileC build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/Plugin.o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp" normal x86_64 c++ com.apple.compilers.gcc.4_2
-cLd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin" normal x86_64
-cTouch "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle"
-
-N/Developer/SDKs/MacOSX10.5.sdk
-c000000004C238B9B00000000000000EE
-t1277397915
-s238
-
-N/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h
-c000000004864BE3E00000000000005D7
-t1214561854
-s1495
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp
-c0000000050522D940000000000000125
-t1347562900
-s293
-i"Plugin.pch"
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.pch
-c000000004AFC45600000000000000083
-t1258046816
-s131
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle
-t1426868926
-s102
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/Info.plist
-t1426868583
-s1067
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin
-t1426868926
-s9280
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/ASimplePlugin.LinkFileList
-c00000000550C496700000000000000AE
-t1426868583
-s174
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/Plugin.o
-t1426868596
-s4428
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/ASimplePlugin.LinkFileList
-c00000000550C4AB900000000000000B0
-t1426868921
-s176
-
-N/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/Plugin.o
-t1426868925
-s5412
-
-N/var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-clbajkoyrordlvgnirwiyhrahkng/Carbon.h.gch
-t1426868595
-s54311280
-
-N/var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h.gch
-t1426868924
-s47769712
-
-NASimplePlugin-Info.plist
-c000000004AFC152E00000000000002B2
-t1258034478
-s690
-
-CCheck dependencies
-r0
-lSLF07#2@18"Check dependencies448561721#448561721#0(0"0(0#1#0"4317978624#0"0#
-
-CCompileC build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/Plugin.o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp" normal i386 c++ com.apple.compilers.gcc.4_2
-s448561396.136709
-e448561396.554116
-r1
-xCompileC
-xbuild/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/Plugin.o
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp
-xnormal
-xi386
-xc++
-xcom.apple.compilers.gcc.4_2
-lSLF07#2@113"Compile /Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp448561396#448561396#0(0"0(0#0#105"/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp4317978624#2169"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x c++ -arch i386 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.5.sdk -mfix-and-continue -fvisibility-inlines-hidden -mmacosx-version-min=10.5 -gdwarf-2 -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-generated-files.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-own-target-headers.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-all-target-headers.hmap" -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-project-headers.hmap" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/include" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources/i386" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources" -include /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-clbajkoyrordlvgnirwiyhrahkng/Carbon.h -c "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp" -o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/Plugin.o"0#
-
-CCompileC build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/Plugin.o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp" normal x86_64 c++ com.apple.compilers.gcc.4_2
-s448561725.157271
-e448561725.401425
-r1
-xCompileC
-xbuild/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/Plugin.o
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp
-xnormal
-xx86_64
-xc++
-xcom.apple.compilers.gcc.4_2
-lSLF07#2@113"Compile /Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp448561725#448561725#0(0"0(0#0#105"/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp4317978624#2175"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x c++ -arch x86_64 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.5.sdk -mfix-and-continue -fvisibility-inlines-hidden -mmacosx-version-min=10.5 -gdwarf-2 -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-generated-files.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-own-target-headers.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-all-target-headers.hmap" -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-project-headers.hmap" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/include" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources/x86_64" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources" -include /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h -c "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/Plugin.cpp" -o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/Plugin.o"0#
-
-CLd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin" normal i386
-s448561396.554178
-e448561399.221807
-r1
-xLd
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin
-xnormal
-xi386
-lSLF07#2@161"Link /Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin448561396#448561399#0(0"0(0#0#0"4317978624#868"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv MACOSX_DEPLOYMENT_TARGET 10.5    /Developer/usr/bin/g++-4.2 -arch i386 -bundle -isysroot /Developer/SDKs/MacOSX10.5.sdk "-L/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" -filelist "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/i386/ASimplePlugin.LinkFileList" -mmacosx-version-min=10.5 -framework Carbon -o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin"0#
-
-CLd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin" normal x86_64
-s448561725.401565
-e448561726.599129
-r1
-xLd
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin
-xnormal
-xx86_64
-lSLF07#2@161"Link /Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin448561725#448561726#0(0"0(0#0#0"4317978624#872"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv MACOSX_DEPLOYMENT_TARGET 10.5    /Developer/usr/bin/g++-4.2 -arch x86_64 -bundle -isysroot /Developer/SDKs/MacOSX10.5.sdk "-L/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" -filelist "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/Objects-normal/x86_64/ASimplePlugin.LinkFileList" -mmacosx-version-min=10.5 -framework Carbon -o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/MacOS/ASimplePlugin"0#
-
-CProcessInfoPlistFile "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/Info.plist" ASimplePlugin-Info.plist
-s448561383.845702
-e448561384.010122
-r1
-xProcessInfoPlistFile
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/Info.plist
-xASimplePlugin-Info.plist
-lSLF07#2@32"Process ASimplePlugin-Info.plist448561383#448561384#0(0"0(0#0#119"/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/ASimplePlugin-Info.plist17212488448#349"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    builtin-infoPlistUtility ASimplePlugin-Info.plist -expandbuildsettings -platform macosx -o "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle/Contents/Info.plist"0#
-
-CProcessPCH++ /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-clbajkoyrordlvgnirwiyhrahkng/Carbon.h.gch /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h normal i386 c++ com.apple.compilers.gcc.4_2
-s448561384.010279
-e448561396.136570
-r1
-xProcessPCH++
-x/var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-clbajkoyrordlvgnirwiyhrahkng/Carbon.h.gch
-x/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h
-xnormal
-xi386
-xc++
-xcom.apple.compilers.gcc.4_2
-lSLF07#2@101"Precompile /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h448561384#448561396#0(0"0(0#0#90"/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h4317978624#1978"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x c++-header -arch i386 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.5.sdk -mfix-and-continue -fvisibility-inlines-hidden -mmacosx-version-min=10.5 -gdwarf-2 -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-generated-files.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-own-target-headers.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-all-target-headers.hmap" -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-project-headers.hmap" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/include" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources/i386" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources" -c /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h -o /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-clbajkoyrordlvgnirwiyhrahkng/Carbon.h.gch0#
-
-CProcessPCH++ /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h.gch /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h normal x86_64 c++ com.apple.compilers.gcc.4_2
-s448561721.632409
-e448561725.157166
-r1
-xProcessPCH++
-x/var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h.gch
-x/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h
-xnormal
-xx86_64
-xc++
-xcom.apple.compilers.gcc.4_2
-lSLF07#2@101"Precompile /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h448561721#448561725#0(0"0(0#0#90"/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h4317978624#1982"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    setenv LANG en_US.US-ASCII    /Developer/usr/bin/gcc-4.2 -x c++-header -arch x86_64 -fmessage-length=0 -pipe -Wno-trigraphs -fpascal-strings -fasm-blocks -O0 -Wreturn-type -Wunused-variable -isysroot /Developer/SDKs/MacOSX10.5.sdk -mfix-and-continue -fvisibility-inlines-hidden -mmacosx-version-min=10.5 -gdwarf-2 -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-generated-files.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-own-target-headers.hmap" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-all-target-headers.hmap" -iquote "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/ASimplePlugin-project-headers.hmap" "-F/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/include" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources/x86_64" "-I/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/XCodePlugin.build/Debug/ASimplePlugin.build/DerivedSources" -c /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h -o /var/folders/wr/5t23_g6x1dbdjh33wck840tm0000gn/C/com.apple.Xcode.501/SharedPrecompiledHeaders/Carbon-dgwkopwwiioyfpdrlezconrzzpuh/Carbon.h.gch0#
-
-CTouch "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle"
-s448561726.599189
-e448561726.669076
-r1
-xTouch
-x/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle
-lSLF07#2@133"Touch /Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle448561726#448561726#0(0"0(0#0#0"4317978624#256"    cd "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin"    /usr/bin/touch -c "/Users/Corey/Desktop/Computational Lab work/example projects/SimplestPluginExample/XCodePlugin/build/Debug/ASimplePlugin.bundle"0#
-
