@@ -46,11 +46,13 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\SyncboxInput.cs" />
-     <Compile Include="Assets\Scripts\Timing\PreciseSyncbox.cs" />
-     <Compile Include="Assets\Scripts\Timing\PreciseTimer.cs" />
-     <Compile Include="Assets\Scripts\Timing\PreciseTimer_Threaded.cs" />
-     <Compile Include="Assets\Scripts\Timing\ThreadedJob.cs" />
+     <Compile Include="Assets\Scripts\Old Syncbox Code\SyncboxInput.cs" />
+     <Compile Include="Assets\Scripts\Old Syncbox Code\Timing\PreciseSyncbox.cs" />
+     <Compile Include="Assets\Scripts\Old Syncbox Code\Timing\PreciseTimer.cs" />
+     <Compile Include="Assets\Scripts\Old Syncbox Code\Timing\PreciseTimer_Threaded.cs" />
+     <Compile Include="Assets\Scripts\Old Syncbox Code\Timing\ThreadedJob.cs" />
+     <Compile Include="Assets\Scripts\System 2.0\TCPClient.cs" />
+     <Compile Include="Assets\Scripts\System 2.0\TCPServer.cs" />
      <None Include="Assets\Fonts\roboto\NOTICE.txt" />
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
