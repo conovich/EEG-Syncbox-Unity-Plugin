@@ -13,11 +13,16 @@ using System.Threading;
 public class TCPServer : MonoBehaviour {
 
 	ThreadedServer myServer;
+	bool isConnected { get { return GetIsConnected(); } }
 
 	// Use this for initialization
-	void Start () {
+	public void RunServer () {
 		myServer = new ThreadedServer ();
 		myServer.Start ();
+	}
+
+	bool GetIsConnected(){
+		return myServer.isServerConnected;
 	}
 
 	void OnApplicationQuit(){
@@ -28,6 +33,8 @@ public class TCPServer : MonoBehaviour {
 
 public class ThreadedServer : ThreadedJob{
 	public bool isRunning = false;
+
+	public bool isServerConnected = false;
 
 	public ThreadedServer(){
 
@@ -45,6 +52,8 @@ public class ThreadedServer : ThreadedJob{
 
 	void ConnectClients(){
 		try {
+			isServerConnected = false;
+
 			IPAddress ipAd = IPAddress.Parse("169.254.50.2");
 			// use local m/c IP address, and 
 			// use the same in the client
@@ -56,15 +65,14 @@ public class ThreadedServer : ThreadedJob{
 			myList.Start();
 			
 			Debug.Log("The server is running at port 8001...");    
-			Debug.Log("The local End point is  :" + 
-			          myList.LocalEndpoint );
+			Debug.Log("The local End point is  :" + myList.LocalEndpoint );
 			Debug.Log("Waiting for a connection.....");
 
 			Socket s = myList.AcceptSocket();
-			ReceiveMessage(s);
+			isServerConnected = true;
 
-			SendMessage("The string was recieved by the server.", s);
-			Debug.Log("\nSent Acknowledgement");
+			ReceiveMessage(s);
+			SendMessage("String recieved the server.", s);
 
 			/* clean up */            
 			s.Close();
@@ -72,23 +80,46 @@ public class ThreadedServer : ThreadedJob{
 			
 		}
 		catch (Exception e) {
-			Debug.Log("Error....." + e.StackTrace);
+			Debug.Log("Connection Error....." + e.StackTrace);
+		}  
+	}
+
+	void CloseServer(){
+		try{
+			isServerConnected = false;
+		}
+		catch (Exception e) {
+			Debug.Log("Close Server Error....." + e.StackTrace);
 		}  
 	}
 
 	void SendMessage(string message, Socket s){
-		
-		ASCIIEncoding asen=new ASCIIEncoding();
-		s.Send(asen.GetBytes(message));
+		try{
+			ASCIIEncoding asen=new ASCIIEncoding();
+			s.Send(asen.GetBytes(message));
+		}
+		catch (Exception e) {
+			Debug.Log("Send Message Error....." + e.StackTrace);
+			Debug.Log("\nSent Acknowledgement");
+		}
 	}
 	
 	void ReceiveMessage(Socket s){
-		
-		byte[] b=new byte[100];
-		int k=s.Receive(b);
-		Debug.Log("Recieved...");
-		for (int i=0;i<k;i++)
-			Debug.Log(Convert.ToChar(b[i]));
+		try{
+			byte[] b=new byte[100];
+			int k=s.Receive(b);
+			Debug.Log("Recieved...");
+			if(k > 0){
+
+				for (int i=0; i<k; i++) {
+					Debug.Log (Convert.ToChar (b [i]));
+				}
+			}
+		}
+
+		catch (Exception e) {
+			Debug.Log("Receive Message Error....." + e.StackTrace);
+		}
 	}
 
 	protected override void OnFinished()
@@ -98,6 +129,9 @@ public class ThreadedServer : ThreadedJob{
 	}
 
 	public void End(){
+		if (isServerConnected) {
+			CloseServer ();
+		}
 		isRunning = false;
 	}
 }
