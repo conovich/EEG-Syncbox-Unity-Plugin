@@ -56,7 +56,8 @@ public class ThreadedClient : ThreadedJob{
 
 			stm = tcpclnt.GetStream();
 
-			SendMessage("Hello World!");
+			//SendMessage("Hello World!");
+			SendMessage("[T0~ID~DATA~AUX]");
 			ReceiveMessage();
 			
 			tcpclnt.Close();
@@ -83,14 +84,16 @@ public class ThreadedClient : ThreadedJob{
 	}
 
 	void ReceiveMessage(){
+		String message = "";
 		try{
 			byte[] bb=new byte[100];
 			int k=stm.Read(bb,0,100);
 			if(k > 0){
 				for (int i=0;i<k;i++){
-					Debug.Log(Convert.ToChar(bb[i]));
+					message += Convert.ToChar(bb[i]);
 				}
 			}
+			Debug.Log(message);
 		}
 		catch (Exception e){
 			Debug.Log("Send Message Error....." + e.StackTrace);
