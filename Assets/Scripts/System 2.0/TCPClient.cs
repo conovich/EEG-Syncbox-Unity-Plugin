@@ -25,6 +25,8 @@ public class TCPClient : MonoBehaviour {
 
 public class ThreadedClient : ThreadedJob{
 	public bool isRunning = false;
+
+	Stream stm;
 	
 	public ThreadedClient(){
 		
@@ -49,23 +51,11 @@ public class ThreadedClient : ThreadedJob{
 			// use the ipaddress as in the server program
 			
 			Debug.Log("Connected");
-			string message = "Hello World!";
-			Debug.Log("String to be transmitted : " + message);
-			
-			String str = message;//Console.ReadLine();
-			Stream stm = tcpclnt.GetStream();
-			
-			ASCIIEncoding asen= new ASCIIEncoding();
-			byte[] ba=asen.GetBytes(str);
-			Debug.Log("Transmitting.....");
-			
-			stm.Write(ba,0,ba.Length);
-			
-			byte[] bb=new byte[100];
-			int k=stm.Read(bb,0,100);
-			
-			for (int i=0;i<k;i++)
-				Debug.Log(Convert.ToChar(bb[i]));
+
+			stm = tcpclnt.GetStream();
+
+			SendMessage("Hello World!");
+			ReceiveMessage();
 			
 			tcpclnt.Close();
 		}
@@ -73,6 +63,25 @@ public class ThreadedClient : ThreadedJob{
 		catch (Exception e) {
 			Debug.Log("Error..... " + e.StackTrace);
 		} 
+	}
+
+	void SendMessage(string message){
+
+		Debug.Log("String to be transmitted : " + message);
+
+		ASCIIEncoding asen= new ASCIIEncoding();
+		byte[] ba=asen.GetBytes(message);
+		Debug.Log("Transmitting.....");
+
+		stm.Write(ba,0,ba.Length);
+	}
+
+	void ReceiveMessage(){
+		byte[] bb=new byte[100];
+		int k=stm.Read(bb,0,100);
+		
+		for (int i=0;i<k;i++)
+			Debug.Log(Convert.ToChar(bb[i]));
 	}
 	
 	protected override void OnFinished()
