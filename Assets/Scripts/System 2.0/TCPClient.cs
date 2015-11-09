@@ -68,22 +68,33 @@ public class ThreadedClient : ThreadedJob{
 	}
 
 	void SendMessage(string message){
+		try{
+			Debug.Log("String to be transmitted : " + message);
 
-		Debug.Log("String to be transmitted : " + message);
+			ASCIIEncoding asen= new ASCIIEncoding();
+			byte[] ba=asen.GetBytes(message);
+			Debug.Log("Transmitting.....");
 
-		ASCIIEncoding asen= new ASCIIEncoding();
-		byte[] ba=asen.GetBytes(message);
-		Debug.Log("Transmitting.....");
-
-		stm.Write(ba,0,ba.Length);
+			stm.Write(ba,0,ba.Length);
+		}
+		catch (Exception e){
+			Debug.Log("Send Message Error....." + e.StackTrace);
+		}
 	}
 
 	void ReceiveMessage(){
-		byte[] bb=new byte[100];
-		int k=stm.Read(bb,0,100);
-		
-		for (int i=0;i<k;i++)
-			Debug.Log(Convert.ToChar(bb[i]));
+		try{
+			byte[] bb=new byte[100];
+			int k=stm.Read(bb,0,100);
+			if(k > 0){
+				for (int i=0;i<k;i++){
+					Debug.Log(Convert.ToChar(bb[i]));
+				}
+			}
+		}
+		catch (Exception e){
+			Debug.Log("Send Message Error....." + e.StackTrace);
+		}
 	}
 	
 	protected override void OnFinished()
