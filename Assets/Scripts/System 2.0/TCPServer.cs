@@ -59,18 +59,11 @@ public class ThreadedServer : ThreadedJob{
 			Debug.Log("Waiting for a connection.....");
 
 			Socket s = myList.AcceptSocket();
-			
-			
-			
-			byte[] b=new byte[100];
-			int k=s.Receive(b);
-			Debug.Log("Recieved...");
-			for (int i=0;i<k;i++)
-				Debug.Log(Convert.ToChar(b[i]));
-			
-			ASCIIEncoding asen=new ASCIIEncoding();
-			s.Send(asen.GetBytes("The string was recieved by the server."));
+			ReceiveMessage(s);
+
+			SendMessage("The string was recieved by the server.", s);
 			Debug.Log("\nSent Acknowledgement");
+
 			/* clean up */            
 			s.Close();
 			myList.Stop();
@@ -78,8 +71,23 @@ public class ThreadedServer : ThreadedJob{
 		}
 		catch (Exception e) {
 			//Console.WriteLine("Error..... " + e.StackTrace);
-			Debug.Log("UH OH" + e.StackTrace);
+			Debug.Log("Error....." + e.StackTrace);
 		}  
+	}
+
+	void SendMessage(string message, Socket s){
+		
+		ASCIIEncoding asen=new ASCIIEncoding();
+		s.Send(asen.GetBytes(message));
+	}
+	
+	void ReceiveMessage(Socket s){
+		
+		byte[] b=new byte[100];
+		int k=s.Receive(b);
+		Debug.Log("Recieved...");
+		for (int i=0;i<k;i++)
+			Debug.Log(Convert.ToChar(b[i]));
 	}
 
 	protected override void OnFinished()
