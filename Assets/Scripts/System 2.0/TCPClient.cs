@@ -19,7 +19,7 @@ public class TCPClient : MonoBehaviour {
 	
 	void OnApplicationQuit(){
 		myClient.End ();
-		Debug.Log ("Ended server.");
+		Debug.Log ("Ended client.");
 	}
 }
 
@@ -45,7 +45,7 @@ public class ThreadedClient : ThreadedJob{
 			TcpClient tcpclnt = new TcpClient();
 			Debug.Log("Connecting.....");
 			
-			tcpclnt.Connect("128.59.87.117",8001);
+			tcpclnt.Connect("169.254.50.2",8001);
 			// use the ipaddress as in the server program
 			
 			Debug.Log("Connected");

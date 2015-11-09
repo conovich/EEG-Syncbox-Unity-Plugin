@@ -43,7 +43,7 @@ public class ThreadedServer : ThreadedJob{
 
 	void ConnectClients(){
 		try {
-			IPAddress ipAd = IPAddress.Parse("128.59.87.117");
+			IPAddress ipAd = IPAddress.Parse("169.254.50.2");
 			// use local m/c IP address, and 
 			// use the same in the client
 			
