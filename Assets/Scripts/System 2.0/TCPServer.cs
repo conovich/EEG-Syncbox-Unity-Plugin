@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿//TCP communication based off of http://www.codeproject.com/Articles/10649/An-Introduction-to-Socket-Programming-in-NET-using
+
+using UnityEngine;
 using System.Collections;
 
 using System;
@@ -70,7 +72,6 @@ public class ThreadedServer : ThreadedJob{
 			
 		}
 		catch (Exception e) {
-			//Console.WriteLine("Error..... " + e.StackTrace);
 			Debug.Log("Error....." + e.StackTrace);
 		}  
 	}
