@@ -2,6 +2,8 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 using System;
 using System.Text;
@@ -15,8 +17,36 @@ public class TCPServer : MonoBehaviour {
 	ThreadedServer myServer;
 	bool isConnected { get { return GetIsConnected(); } }
 
-	// Use this for initialization
-	public void RunServer () {
+
+
+	int QUEUE_SIZE = 20;  //Blocks if the queue is full
+
+
+	//SINGLETON
+	private static TCPServer _instance;
+	
+	public static TCPServer Instance{
+		get{
+			return _instance;
+		}
+	}
+	
+	void Awake(){
+		
+		if (_instance != null) {
+			Debug.Log("Instance already exists!");
+			Destroy(transform.gameObject);
+			return;
+		}
+		_instance = this;
+	}
+
+	void Start(){
+		RunServer ();
+	}
+
+	
+	void RunServer () {
 		myServer = new ThreadedServer ();
 		myServer.Start ();
 	}
@@ -29,12 +59,34 @@ public class TCPServer : MonoBehaviour {
 		myServer.End ();
 		Debug.Log ("Ended server.");
 	}
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public class ThreadedServer : ThreadedJob{
 	public bool isRunning = false;
 
 	public bool isServerConnected = false;
+	public bool isSynced = false;
+
+
+	char MSG_START = '[';
+	char MSG_SEPARATOR = '~';
+	char MSG_END = ']';
 
 	public ThreadedServer(){
 
@@ -71,8 +123,9 @@ public class ThreadedServer : ThreadedJob{
 			Socket s = myList.AcceptSocket();
 			isServerConnected = true;
 
-			ReceiveMessage(s);
-			SendMessage("String recieved the server.", s);
+			String message = ReceiveMessageBuffer(s);
+			SendMessage("String recieved by server.", s);
+			ProcessMessageBuffer(message);
 
 			/* clean up */            
 			s.Close();
@@ -104,7 +157,8 @@ public class ThreadedServer : ThreadedJob{
 		}
 	}
 	
-	void ReceiveMessage(Socket s){
+	String ReceiveMessageBuffer(Socket s){
+		String messageBuffer = "";
 		try{
 			byte[] b=new byte[100];
 			int k=s.Receive(b);
@@ -112,14 +166,83 @@ public class ThreadedServer : ThreadedJob{
 			if(k > 0){
 
 				for (int i=0; i<k; i++) {
-					Debug.Log (Convert.ToChar (b [i]));
+					messageBuffer += Convert.ToChar(b[i]);
 				}
 			}
+			Debug.Log (messageBuffer);
 		}
 
 		catch (Exception e) {
 			Debug.Log("Receive Message Error....." + e.StackTrace);
 		}
+
+		return messageBuffer;
+	}
+
+	void ProcessMessageBuffer(string messageBuffer){
+		if (messageBuffer != "") {
+			string[] splitBuffer = messageBuffer.Split(MSG_START);
+
+
+			int numMessages = splitBuffer.Length;
+
+			for(int i = 0; i < numMessages; i++){
+				DecodeMessage(splitBuffer[i]);
+				Debug.Log("MESSAGE BUFFER " + i + ": " + splitBuffer[i]);
+			}
+		}
+	}
+
+	void DecodeMessage(string message){
+		string[] splitMessage = message.Split (new Char [] {MSG_START, MSG_SEPARATOR, MSG_END});
+
+		string t0 = "";
+		string id = "";
+		string data = "";
+		string aux = "";
+
+		for (int i = 0; i < splitMessage.Length; i++) {
+			switch (i){
+				case 0:
+					t0 = splitMessage[i];
+					Debug.Log("T0: " + t0);
+					break;
+				case 1:
+					id = splitMessage[i];
+					Debug.Log("ID: " + id);
+					break;
+				case 2:
+					data = splitMessage[i];
+					Debug.Log("DATA: " + data);
+					break;
+				case 3:
+					aux = splitMessage[i];
+					Debug.Log("AUX: " + aux);
+					break;
+			}
+		}
+
+		switch (id) {
+			case "ID":
+				//do nothing
+				break;
+			case "SYNC":
+				//Sync received from Control PC
+				//Exho SYNC back to Control PC with high precision time so that clocks can be aligned
+				//TODO: do this.
+				break;
+			case "SYNCED":
+				//Control PC is done with clock alignment
+				isSynced = true;
+				break;
+			case "EXIT":
+				//Control PC is exiting. If heartbeat is active, this is a premature abort.
+				//TODO: do this.
+				break;
+			default:
+				break;
+		}
+
 	}
 
 	protected override void OnFinished()
