@@ -49,9 +49,10 @@ public class ThreadedClient : ThreadedJob{
 			// use the ipaddress as in the server program
 			
 			Debug.Log("Connected");
-			Debug.Log("Enter the string to be transmitted : ");
+			string message = "Hello World!";
+			Debug.Log("String to be transmitted : " + message);
 			
-			String str=Console.ReadLine();
+			String str = message;//Console.ReadLine();
 			Stream stm = tcpclnt.GetStream();
 			
 			ASCIIEncoding asen= new ASCIIEncoding();
