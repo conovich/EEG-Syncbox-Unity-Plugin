@@ -182,7 +182,7 @@ public class ThreadedServer : ThreadedJob{
 
         //Format the message
         //TODO: Change to JSONRPC and add checksum
-		string t0 = systemTime;//TODO: "%020.0f" % systemTime;
+		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
 		string message = MSG_START + t0 + MSG_SEPARATOR + "ERROR" + MSG_END;
 			
 		if (auxData.Length > 0){
@@ -241,6 +241,7 @@ public class ThreadedServer : ThreadedJob{
 	}
 
 	void ProcessMessageBuffer(string messageBuffer){
+		//TODO: DEAL WITH MESSAGES GETTING CUT IN HALF AND SUCH.
 		if (messageBuffer != "") {
 			string[] splitBuffer = messageBuffer.Split(new char[] {MSG_START}, StringSplitOptions.RemoveEmptyEntries);
 
