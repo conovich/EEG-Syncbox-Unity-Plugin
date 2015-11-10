@@ -84,6 +84,7 @@ public class ThreadedServer : ThreadedJob{
 	public bool isSynced = false;
 
 	Socket s;
+	TcpListener myList;
 
 
 	char MSG_START = '[';
@@ -132,7 +133,7 @@ public class ThreadedServer : ThreadedJob{
 			// use the same in the client
 			
 			/* Initializes the Listener */
-			TcpListener myList=new TcpListener(ipAd,8001);
+			myList = new TcpListener(ipAd,8001);
 			
 			/* Start Listening at the specified port */        
 			myList.Start();
@@ -145,14 +146,12 @@ public class ThreadedServer : ThreadedJob{
 			isServerConnected = true;
 
 			String message = ReceiveMessageBuffer();
-			SendMessage("String recieved by server.");
+			//SendMessage("String recieved by server.");
 			ProcessMessageBuffer(message);
 
-			SendEvent(GameClock.SystemTime_Milliseconds, EventType.ALIGNCLOCK, "heyoooo", "nothing aux to see here..."); //TODO: gets sent along with the previous send message call... is this alright?
+			SendEvent(GameClock.SystemTime_Milliseconds, EventType.ALIGNCLOCK, "event stuff!", "nothing aux to see here..."); //TODO: gets sent along with the previous send message call... is this alright?
 
-			/* clean up */            
-			s.Close();
-			myList.Stop();
+			CleanupConnections();
 
 			isServerConnected = false;
 			
@@ -160,6 +159,14 @@ public class ThreadedServer : ThreadedJob{
 		catch (Exception e) {
 			Debug.Log("Connection Error....." + e.StackTrace);
 		}  
+	}
+
+
+
+	void CleanupConnections(){
+		/* clean up */            
+		s.Close();
+		myList.Stop();
 	}
 
 	void CloseServer(){
@@ -175,7 +182,7 @@ public class ThreadedServer : ThreadedJob{
 
         //Format the message
         //TODO: Change to JSONRPC and add checksum
-		string t0 = "";//TODO: "%020.0f" % systemTime;
+		string t0 = systemTime;//TODO: "%020.0f" % systemTime;
 		string message = MSG_START + t0 + MSG_SEPARATOR + "ERROR" + MSG_END;
 			
 		if (auxData.Length > 0){
