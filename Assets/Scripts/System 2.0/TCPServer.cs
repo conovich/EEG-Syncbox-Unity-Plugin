@@ -83,15 +83,37 @@ public class ThreadedServer : ThreadedJob{
 	public bool isServerConnected = false;
 	public bool isSynced = false;
 
+	Socket s;
+
 
 	char MSG_START = '[';
 	char MSG_SEPARATOR = '~';
 	char MSG_END = ']';
 
-	public ThreadedServer(){
-
+	public enum EventType {
+		SUBJECTID,
+		EXPNAME,
+		VERSION,
+		INFO,
+		CONTROL,
+		SESSION,
+		PRACTICE,
+		TRIAL,
+		PHASE,
+		DISPLAYON,
+		DISPLAYOFF,
+		HEARTBEAT,
+		ALIGNCLOCK,
+		ABORT,
+		SYTNC,
+		SYNCED,
+		EXIT
 	}
-
+		
+	public ThreadedServer(){
+		
+	}
+	
 	protected override void ThreadFunction()
 	{
 		isRunning = true;
@@ -104,7 +126,6 @@ public class ThreadedServer : ThreadedJob{
 
 	void ConnectClients(){
 		try {
-			isServerConnected = false;
 
 			IPAddress ipAd = IPAddress.Parse("169.254.50.2");
 			// use local m/c IP address, and 
@@ -120,16 +141,20 @@ public class ThreadedServer : ThreadedJob{
 			Debug.Log("The local End point is  :" + myList.LocalEndpoint );
 			Debug.Log("Waiting for a connection.....");
 
-			Socket s = myList.AcceptSocket();
+			s = myList.AcceptSocket();
 			isServerConnected = true;
 
-			String message = ReceiveMessageBuffer(s);
-			SendMessage("String recieved by server.", s);
+			String message = ReceiveMessageBuffer();
+			SendMessage("String recieved by server.");
 			ProcessMessageBuffer(message);
+
+			SendEvent(GameClock.SystemTime_Milliseconds, EventType.ALIGNCLOCK, "heyoooo", "nothing aux to see here..."); //TODO: gets sent along with the previous send message call... is this alright?
 
 			/* clean up */            
 			s.Close();
 			myList.Stop();
+
+			isServerConnected = false;
 			
 		}
 		catch (Exception e) {
@@ -146,18 +171,47 @@ public class ThreadedServer : ThreadedJob{
 		}  
 	}
 
-	void SendMessage(string message, Socket s){
-		try{
-			ASCIIEncoding asen=new ASCIIEncoding();
-			s.Send(asen.GetBytes(message));
+	void SendEvent(long systemTime, EventType eventType, string eventData, string auxData){
+
+        //Format the message
+        //TODO: Change to JSONRPC and add checksum
+		string t0 = "";//TODO: "%020.0f" % systemTime;
+		string message = MSG_START + t0 + MSG_SEPARATOR + "ERROR" + MSG_END;
+			
+		if (auxData.Length > 0){
+			message = MSG_START
+				+ t0 + MSG_SEPARATOR
+				+ eventType.ToString() + MSG_SEPARATOR
+				+ eventData + MSG_SEPARATOR
+					+ auxData + MSG_END;
 		}
-		catch (Exception e) {
+		else if( eventData.Length > 0){
+			message = MSG_START
+				+ t0 + MSG_SEPARATOR
+					+ eventType.ToString() + MSG_SEPARATOR
+					+ eventData + MSG_END;
+		}
+		else{
+			message = MSG_START
+				+ t0 + MSG_SEPARATOR
+					+ eventType.ToString() + MSG_END;
+		}
+		SendMessage (message);
+	}
+
+					
+	void SendMessage(string message){
+			try{
+				ASCIIEncoding asen=new ASCIIEncoding();
+				s.Send(asen.GetBytes(message));
+			}
+			catch (Exception e) {
 			Debug.Log("Send Message Error....." + e.StackTrace);
 			Debug.Log("\nSent Acknowledgement");
 		}
 	}
 	
-	String ReceiveMessageBuffer(Socket s){
+	String ReceiveMessageBuffer(){
 		String messageBuffer = "";
 		try{
 			byte[] b=new byte[100];
