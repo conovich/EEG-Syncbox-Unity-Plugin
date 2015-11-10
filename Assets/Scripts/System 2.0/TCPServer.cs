@@ -181,7 +181,7 @@ public class ThreadedServer : ThreadedJob{
 
 	void ProcessMessageBuffer(string messageBuffer){
 		if (messageBuffer != "") {
-			string[] splitBuffer = messageBuffer.Split(MSG_START);
+			string[] splitBuffer = messageBuffer.Split(new char[] {MSG_START}, StringSplitOptions.RemoveEmptyEntries);
 
 
 			int numMessages = splitBuffer.Length;
