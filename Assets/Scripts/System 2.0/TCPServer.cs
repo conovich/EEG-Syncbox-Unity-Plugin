@@ -93,6 +93,7 @@ public class ThreadedServer : ThreadedJob{
 	public bool isSynced = false;
 
 	string messagesToSend = "";
+	string incompleteMessage = "";
 
 	Socket s;
 	TcpListener myList;
@@ -253,68 +254,137 @@ public class ThreadedServer : ThreadedJob{
 	}
 
 	void ProcessMessageBuffer(string messageBuffer){
-		//TODO: DEAL WITH MESSAGES GETTING CUT IN HALF AND SUCH.
+		//DEALS WITH MESSAGES GETTING CUT IN HALF AND SUCH. TODO: I'm guessing this could be refactored...
+
+		string MSG_START_STRING = MSG_START.ToString ();
+		string MSG_END_STRING = MSG_END.ToString ();
+
+
 		if (messageBuffer != "") {
-			string[] splitBuffer = messageBuffer.Split(new char[] {MSG_START}, StringSplitOptions.RemoveEmptyEntries);
+			//string[] splitBuffer = messageBuffer.Split(new char[] {MSG_START}, StringSplitOptions.RemoveEmptyEntries);
+			string[] splitBuffer = Regex.Split(messageBuffer, "(\\" + MSG_START_STRING + ")");
 
+			List<String> separateMessages = new List<string>();
 
-			int numMessages = splitBuffer.Length;
+			for(int i = 0; i < splitBuffer.Length - 1; i++){
+				if(splitBuffer[i] == MSG_START_STRING){
+					splitBuffer[i] += splitBuffer[i+1]; //will create duplicate messages...
+					separateMessages.Add(splitBuffer[i]);
+				}
+				else{
+					if ( (i == 0) && (splitBuffer[i] != "") ){
+						separateMessages.Add(splitBuffer[i]);
+					}
+				}
+			}
+
+			int numMessages = separateMessages.Count;
 
 			for(int i = 0; i < numMessages; i++){
-				DecodeMessage(splitBuffer[i]);
-				Debug.Log("MESSAGE BUFFER " + i + ": " + splitBuffer[i]);
+				Debug.Log("SEPARATE MESSAGES " + i + ": " + separateMessages[i]);
+
+				//if it's the first element...
+				if(i == 0){
+					string firstMessage = separateMessages[i];
+					//if it contains a start character...
+					if( firstMessage.Contains(MSG_START_STRING) ){
+
+						if( firstMessage.Contains(MSG_END_STRING) ){ //first in buffer, has both start and end characters
+							//decode normally! a full message!
+							DecodeMessage(firstMessage);
+						}
+						else{//first in buffer, has only start character --> must be an incomplete message.
+							incompleteMessage = firstMessage; //incomplete message gets reset.
+						}
+					}
+					else if( firstMessage.Contains(MSG_END_STRING) ){ //message contains only end character, no start --> must be finishing an incomplete message
+						if(incompleteMessage.Contains(MSG_START_STRING)){
+							incompleteMessage += firstMessage;
+							//DECODE IT!
+							DecodeMessage(incompleteMessage);
+						}
+						incompleteMessage = "";
+					}
+					else{ //no start or end character, must be the center of an incomplete message
+						incompleteMessage += firstMessage;
+					}
+				}
+				//else if it's the last element...
+				else if( i == numMessages - 1 ){
+					string lastMessage = separateMessages[i];
+					if( !lastMessage.Contains(MSG_END_STRING) ){ //no end character, must be an incomplete message
+						incompleteMessage += splitBuffer[i];
+					}
+					else{
+						//decode normally!
+						DecodeMessage(lastMessage);
+					}
+				}
+				//if it's a middle element to the message buffer, it must be a complete message --> decode normally
+				else{
+					DecodeMessage(separateMessages[i]);
+				}
 			}
 		}
 	}
 
 	void DecodeMessage(string message){
-		string[] splitMessage = message.Split (new Char [] {MSG_START, MSG_SEPARATOR, MSG_END});
+		//...assumes we got here with a message in the correct form...
 
-		string t0 = "";
-		string id = "";
-		string data = "";
-		string aux = "";
+		//Extract content between [] brackets before splitting. Then just split with the message separator.
+		string[] messageContent = Regex.Split(message, ( "\\" + MSG_START + "(.*?)" + "\\" + MSG_END ) );//"(\\" + MSG_START.ToString() + ")");
 
-		for (int i = 0; i < splitMessage.Length; i++) {
-			switch (i){
-				case 0:
-					t0 = splitMessage[i];
-					Debug.Log("T0: " + t0);
+		//string[] splitMessage = message.Split (new Char [] {MSG_START, MSG_SEPARATOR, MSG_END});
+		if (messageContent.Length > 2) { 
+			string[] splitMessage = messageContent [1].Split ( MSG_SEPARATOR );
+
+			string t0 = "";
+			string id = "";
+			string data = "";
+			string aux = "";
+
+			for (int i = 0; i < splitMessage.Length; i++) {
+				switch (i) {
+					//CASES 0 & 5 are EMPTY STRINGS.
+					case 0:
+						t0 = splitMessage [i];
+						Debug.Log ("T0: " + t0);
+						break;
+					case 1:
+						id = splitMessage [i];
+						Debug.Log ("ID: " + id);
+						break;
+					case 2:
+						data = splitMessage [i];
+						Debug.Log ("DATA: " + data);
+						break;
+					case 3:
+						aux = splitMessage [i];
+						Debug.Log ("AUX: " + aux);
+						break;
+				}
+			}
+
+			switch (id) {
+				case "ID":
+					//do nothing
 					break;
-				case 1:
-					id = splitMessage[i];
-					Debug.Log("ID: " + id);
+				case "SYNC":
+					//Sync received from Control PC
+					//Exho SYNC back to Control PC with high precision time so that clocks can be aligned
+					//TODO: do this.
 					break;
-				case 2:
-					data = splitMessage[i];
-					Debug.Log("DATA: " + data);
+				case "SYNCED":
+					//Control PC is done with clock alignment
+					isSynced = true;
 					break;
-				case 3:
-					aux = splitMessage[i];
-					Debug.Log("AUX: " + aux);
+				case "EXIT":
+					//Control PC is exiting. If heartbeat is active, this is a premature abort.
+					//TODO: do this.
+					break;
+				default:
 					break;
 			}
-		}
-
-		switch (id) {
-			case "ID":
-				//do nothing
-				break;
-			case "SYNC":
-				//Sync received from Control PC
-				//Exho SYNC back to Control PC with high precision time so that clocks can be aligned
-				//TODO: do this.
-				break;
-			case "SYNCED":
-				//Control PC is done with clock alignment
-				isSynced = true;
-				break;
-			case "EXIT":
-				//Control PC is exiting. If heartbeat is active, this is a premature abort.
-				//TODO: do this.
-				break;
-			default:
-				break;
 		}
 
 	}
