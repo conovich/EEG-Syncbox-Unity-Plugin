@@ -45,10 +45,19 @@ public class TCPServer : MonoBehaviour {
 		RunServer ();
 	}
 
-	
 	void RunServer () {
 		myServer = new ThreadedServer ();
 		myServer.Start ();
+	}
+
+	void Update(){
+		GetInput ();
+	}
+
+	void GetInput(){
+		if(Input.GetKeyDown(KeyCode.M)){
+			myServer.SendEvent(GameClock.SystemTime_Milliseconds, ThreadedServer.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
+		}
 	}
 
 	bool GetIsConnected(){
@@ -82,6 +91,8 @@ public class ThreadedServer : ThreadedJob{
 
 	public bool isServerConnected = false;
 	public bool isSynced = false;
+
+	string messagesToSend = "";
 
 	Socket s;
 	TcpListener myList;
@@ -120,40 +131,22 @@ public class ThreadedServer : ThreadedJob{
 		isRunning = true;
 		// Do your threaded task. DON'T use the Unity API here
 		while (isRunning) {
-			ConnectClients();
+			TalkToClient();
 		}
 
 	}
 
-	void ConnectClients(){
+	void TalkToClient(){
 		try {
-
-			IPAddress ipAd = IPAddress.Parse("169.254.50.2");
-			// use local m/c IP address, and 
-			// use the same in the client
-			
-			/* Initializes the Listener */
-			myList = new TcpListener(ipAd,8001);
-			
-			/* Start Listening at the specified port */        
-			myList.Start();
-			
-			Debug.Log("The server is running at port 8001...");    
-			Debug.Log("The local End point is  :" + myList.LocalEndpoint );
-			Debug.Log("Waiting for a connection.....");
-
-			s = myList.AcceptSocket();
-			isServerConnected = true;
+			OpenConnections();
 
 			String message = ReceiveMessageBuffer();
 			//SendMessage("String recieved by server.");
+			SendMessage(messagesToSend);
+			messagesToSend = "";
 			ProcessMessageBuffer(message);
 
-			SendEvent(GameClock.SystemTime_Milliseconds, EventType.ALIGNCLOCK, "event stuff!", "nothing aux to see here..."); //TODO: gets sent along with the previous send message call... is this alright?
-
 			CleanupConnections();
-
-			isServerConnected = false;
 			
 		}
 		catch (Exception e) {
@@ -161,12 +154,30 @@ public class ThreadedServer : ThreadedJob{
 		}  
 	}
 
-
-
+	void OpenConnections(){
+		IPAddress ipAd = IPAddress.Parse("169.254.50.2");
+		// use local m/c IP address, and 
+		// use the same in the client
+		
+		/* Initializes the Listener */
+		myList = new TcpListener(ipAd,8001);
+		
+		/* Start Listening at the specified port */        
+		myList.Start();
+		
+		Debug.Log("The server is running at port 8001...");    
+		Debug.Log("The local End point is  :" + myList.LocalEndpoint );
+		Debug.Log("Waiting for a connection.....");
+		
+		s = myList.AcceptSocket();
+		isServerConnected = true;
+	}
+	
 	void CleanupConnections(){
 		/* clean up */            
 		s.Close();
 		myList.Stop();
+		isServerConnected = false;
 	}
 
 	void CloseServer(){
@@ -178,10 +189,9 @@ public class ThreadedServer : ThreadedJob{
 		}  
 	}
 
-	void SendEvent(long systemTime, EventType eventType, string eventData, string auxData){
-
+	public void SendEvent(long systemTime, EventType eventType, string eventData, string auxData){
         //Format the message
-        //TODO: Change to JSONRPC and add checksum
+        //(from the python code:) TODO: Change to JSONRPC and add checksum
 		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
 		string message = MSG_START + t0 + MSG_SEPARATOR + "ERROR" + MSG_END;
 			
@@ -203,18 +213,20 @@ public class ThreadedServer : ThreadedJob{
 				+ t0 + MSG_SEPARATOR
 					+ eventType.ToString() + MSG_END;
 		}
-		SendMessage (message);
+
+		messagesToSend += message;
+
 	}
 
 					
 	void SendMessage(string message){
-			try{
-				ASCIIEncoding asen=new ASCIIEncoding();
-				s.Send(asen.GetBytes(message));
-			}
-			catch (Exception e) {
+		try{
+			ASCIIEncoding asen=new ASCIIEncoding();
+			s.Send(asen.GetBytes(message));
+			Debug.Log("\nSent Message: " + message);
+		}
+		catch (Exception e) {
 			Debug.Log("Send Message Error....." + e.StackTrace);
-			Debug.Log("\nSent Acknowledgement");
 		}
 	}
 	
