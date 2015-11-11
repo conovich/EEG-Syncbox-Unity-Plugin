@@ -58,6 +58,10 @@ public class ThreadedClient : ThreadedJob{
 
 			//SendMessage("Hello World!");
 			SendMessage("[T0~ID~DATA~AUX]");
+			//SendMessage("[T0~ID~DATA~AUX][T0~ID~DATA~AUX][T0~ID~DATA~AUX][T0~ID~DATA~AUX]");
+			//SendMessage ("[T0~ID~DATA~AUX][T0~ID~DATA~AUX");
+			//SendMessage ("T0~ID~DATA~AUX][T0~ID~DATA~AUX]");
+			//SendMessage ("T0~ID~DATA~AUX");
 			ReceiveMessage();
 			
 			tcpclnt.Close();
