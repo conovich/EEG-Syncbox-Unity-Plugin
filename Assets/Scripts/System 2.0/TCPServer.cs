@@ -56,12 +56,41 @@ public class TCPServer : MonoBehaviour {
 
 	void GetInput(){
 		if(Input.GetKeyDown(KeyCode.M)){
-			myServer.SendEvent(GameClock.SystemTime_Milliseconds, ThreadedServer.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
+			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
 		}
 	}
 
 	bool GetIsConnected(){
 		return myServer.isServerConnected;
+	}
+
+	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
+		//Format the message
+		//(from the python code:) TODO: Change to JSONRPC and add checksum
+		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
+		string message = TCP_Config.MSG_START + t0 + TCP_Config.MSG_SEPARATOR + "ERROR" + TCP_Config.MSG_END;
+		
+		if (auxData.Length > 0){
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
+					+ eventData + TCP_Config.MSG_SEPARATOR
+					+ auxData + TCP_Config.MSG_END;
+		}
+		else if( eventData.Length > 0){
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
+					+ eventData + TCP_Config.MSG_END;
+		}
+		else{
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_END;
+		}
+		
+		myServer.messagesToSend += message;
+		
 	}
 
 	void OnApplicationQuit(){
@@ -92,36 +121,11 @@ public class ThreadedServer : ThreadedJob{
 	public bool isServerConnected = false;
 	public bool isSynced = false;
 
-	string messagesToSend = "";
+	public string messagesToSend = "";
 	string incompleteMessage = "";
 
 	Socket s;
 	TcpListener myList;
-
-
-	char MSG_START = '[';
-	char MSG_SEPARATOR = '~';
-	char MSG_END = ']';
-
-	public enum EventType {
-		SUBJECTID,
-		EXPNAME,
-		VERSION,
-		INFO,
-		CONTROL,
-		SESSION,
-		PRACTICE,
-		TRIAL,
-		PHASE,
-		DISPLAYON,
-		DISPLAYOFF,
-		HEARTBEAT,
-		ALIGNCLOCK,
-		ABORT,
-		SYTNC,
-		SYNCED,
-		EXIT
-	}
 		
 	public ThreadedServer(){
 		
@@ -131,23 +135,33 @@ public class ThreadedServer : ThreadedJob{
 	{
 		isRunning = true;
 		// Do your threaded task. DON'T use the Unity API here
+		OpenConnections();
 		while (isRunning) {
 			TalkToClient();
 		}
-
+		CleanupConnections();
 	}
 
 	void TalkToClient(){
 		try {
-			OpenConnections();
+			//OpenConnections();
 
 			String message = ReceiveMessageBuffer();
 			//SendMessage("String recieved by server.");
-			SendMessage(messagesToSend);
-			messagesToSend = "";
 			ProcessMessageBuffer(message);
 
-			CleanupConnections();
+			//TESTING THE ECHO TEST. ASSUMING MESSAGE == "Test Message"
+
+			if(message != ""){
+
+				messagesToSend = "ECHO: " + message;
+
+				SendMessage(messagesToSend);
+				messagesToSend = "";
+
+			}
+
+			//CleanupConnections();
 			
 		}
 		catch (Exception e) {
@@ -156,22 +170,25 @@ public class ThreadedServer : ThreadedJob{
 	}
 
 	void OpenConnections(){
-		IPAddress ipAd = IPAddress.Parse("169.254.50.2");
+		IPAddress ipAd = IPAddress.Parse(TCP_Config.HostIPAddress);
+
 		// use local m/c IP address, and 
 		// use the same in the client
 		
 		/* Initializes the Listener */
-		myList = new TcpListener(ipAd,8001);
+		myList = new TcpListener(ipAd,TCP_Config.ConnectionPort);
 		
 		/* Start Listening at the specified port */        
 		myList.Start();
 		
-		Debug.Log("The server is running at port 8001...");    
+		Debug.Log("The server is running at port" + TCP_Config.ConnectionPort + "...");    
 		Debug.Log("The local End point is  :" + myList.LocalEndpoint );
 		Debug.Log("Waiting for a connection.....");
 		
 		s = myList.AcceptSocket();
 		isServerConnected = true;
+
+		Debug.Log("CONNECTED!");
 	}
 	
 	void CleanupConnections(){
@@ -188,35 +205,6 @@ public class ThreadedServer : ThreadedJob{
 		catch (Exception e) {
 			Debug.Log("Close Server Error....." + e.StackTrace);
 		}  
-	}
-
-	public void SendEvent(long systemTime, EventType eventType, string eventData, string auxData){
-        //Format the message
-        //(from the python code:) TODO: Change to JSONRPC and add checksum
-		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
-		string message = MSG_START + t0 + MSG_SEPARATOR + "ERROR" + MSG_END;
-			
-		if (auxData.Length > 0){
-			message = MSG_START
-				+ t0 + MSG_SEPARATOR
-				+ eventType.ToString() + MSG_SEPARATOR
-				+ eventData + MSG_SEPARATOR
-					+ auxData + MSG_END;
-		}
-		else if( eventData.Length > 0){
-			message = MSG_START
-				+ t0 + MSG_SEPARATOR
-					+ eventType.ToString() + MSG_SEPARATOR
-					+ eventData + MSG_END;
-		}
-		else{
-			message = MSG_START
-				+ t0 + MSG_SEPARATOR
-					+ eventType.ToString() + MSG_END;
-		}
-
-		messagesToSend += message;
-
 	}
 
 					
@@ -256,8 +244,8 @@ public class ThreadedServer : ThreadedJob{
 	void ProcessMessageBuffer(string messageBuffer){
 		//DEALS WITH MESSAGES GETTING CUT IN HALF AND SUCH. TODO: I'm guessing this could be refactored...
 
-		string MSG_START_STRING = MSG_START.ToString ();
-		string MSG_END_STRING = MSG_END.ToString ();
+		string MSG_START_STRING = TCP_Config.MSG_START.ToString ();
+		string MSG_END_STRING = TCP_Config.MSG_END.ToString ();
 
 
 		if (messageBuffer != "") {
@@ -332,11 +320,11 @@ public class ThreadedServer : ThreadedJob{
 		//...assumes we got here with a message in the correct form...
 
 		//Extract content between [] brackets before splitting. Then just split with the message separator.
-		string[] messageContent = Regex.Split(message, ( "\\" + MSG_START + "(.*?)" + "\\" + MSG_END ) );//"(\\" + MSG_START.ToString() + ")");
+		string[] messageContent = Regex.Split(message, ( "\\" + TCP_Config.MSG_START + "(.*?)" + "\\" + TCP_Config.MSG_END ) );//"(\\" + MSG_START.ToString() + ")");
 
 		//string[] splitMessage = message.Split (new Char [] {MSG_START, MSG_SEPARATOR, MSG_END});
 		if (messageContent.Length > 2) { 
-			string[] splitMessage = messageContent [1].Split ( MSG_SEPARATOR );
+			string[] splitMessage = messageContent [1].Split ( TCP_Config.MSG_SEPARATOR );
 
 			string t0 = "";
 			string id = "";

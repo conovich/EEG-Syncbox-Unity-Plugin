@@ -49,7 +49,7 @@ public class ThreadedClient : ThreadedJob{
 			TcpClient tcpclnt = new TcpClient();
 			Debug.Log("Connecting.....");
 			
-			tcpclnt.Connect("169.254.50.2",8001);
+			tcpclnt.Connect(TCP_Config.HostIPAddress,TCP_Config.ConnectionPort);
 			// use the ipaddress as in the server program
 			
 			Debug.Log("Connected");
