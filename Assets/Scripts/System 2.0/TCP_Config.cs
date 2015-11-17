@@ -10,7 +10,10 @@ public class TCP_Config : MonoBehaviour {
 	public static char MSG_START = '[';
 	public static char MSG_SEPARATOR = '~';
 	public static char MSG_END = ']';
-	
+
+	public static string ExpName = "System2.0Test";
+	public static string SubjectName = "FakeSubjectName";
+
 	public enum EventType {
 		SUBJECTID,
 		EXPNAME,
@@ -26,7 +29,7 @@ public class TCP_Config : MonoBehaviour {
 		HEARTBEAT,
 		ALIGNCLOCK,
 		ABORT,
-		SYTNC,
+		SYNC,
 		SYNCED,
 		EXIT
 	}

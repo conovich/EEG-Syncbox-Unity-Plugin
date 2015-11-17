@@ -9,6 +9,7 @@ using System;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 using System.Threading;
 
@@ -34,7 +35,7 @@ public class TCPServer : MonoBehaviour {
 	void Awake(){
 		
 		if (_instance != null) {
-			Debug.Log("Instance already exists!");
+			UnityEngine.Debug.Log("Instance already exists!");
 			Destroy(transform.gameObject);
 			return;
 		}
@@ -66,7 +67,7 @@ public class TCPServer : MonoBehaviour {
 
 	void OnApplicationQuit(){
 		myServer.End ();
-		Debug.Log ("Ended server.");
+		UnityEngine.Debug.Log ("Ended server.");
 	}
 
 
@@ -85,6 +86,13 @@ public class ThreadedServer : ThreadedJob{
 
 	public bool isServerConnected = false;
 	public bool isSynced = false;
+	Stopwatch clockAlignmentStopwatch;
+	int numClockAlignmentTries = 0;
+	const int timeBetweenClockAlignmentTriesMS = 500; //half a second
+	const int maxNumClockAlignmentTries = 120; //for a total of 60 seconds of attempted alignment
+
+
+
 
 	public string messagesToSend = "";
 	string incompleteMessage = "";
@@ -102,10 +110,9 @@ public class ThreadedServer : ThreadedJob{
 	{
 		isRunning = true;
 		// Do your threaded task. DON'T use the Unity API here
-		StartHeartbeatPoll();
 		while (isRunning) {
 			if(!isServerConnected){
-				OpenConnections();
+				InitControlPC();
 			}
 			TalkToClient();
 		}
@@ -114,26 +121,26 @@ public class ThreadedServer : ThreadedJob{
 	
 	void TalkToClient(){
 		try {
+			if(!isSynced){
+				if(numClockAlignmentTries < maxNumClockAlignmentTries){
+					CheckClockAlignment();
+				}
+				else{
+					//TODO: what to do if the clocked never synced?!
+				}
+			}
+
 			//OpenConnections();
 
 			//SEND HEARTBEAT
-			messagesToSend = "";
+			//messagesToSend = ""; //uncomment to test solo heartbeat.
 			SendHeartbeatPolled();
 
+			CheckForMessages();
 
+			SendMessages();
 
-			String message = ReceiveMessageBuffer();
-			//SendMessage("String recieved by server.");
-
-			Debug.Log("SENDING MESSAGE: " + messagesToSend);
-			if(messagesToSend != ""){
-				SendMessage(messagesToSend);
-				messagesToSend = "";
-			}
-
-			ProcessMessageBuffer(message);
-
-			Debug.Log("MAIN LOOP EXECUTED");
+			UnityEngine.Debug.Log("MAIN LOOP EXECUTED");
 
 			//ECHO TEST
 			/*
@@ -152,8 +159,26 @@ public class ThreadedServer : ThreadedJob{
 			
 		}
 		catch (Exception e) {
-			Debug.Log("Connection Error....." + e.StackTrace);
+			UnityEngine.Debug.Log("Connection Error....." + e.StackTrace);
 		}  
+	}
+
+	void InitControlPC(){
+
+		//connect
+		OpenConnections();
+
+		//send name of this experiment
+		SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.EXPNAME, TCP_Config.ExpName, "");
+
+		//send subject ID
+		SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName, "");
+
+		//align clocks //TODO: SHOULD THIS BE FINISHED BEFORE WE START SENDING HEARTBEATS?
+		RequestClockAlignment();
+
+		//start heartbeat
+		StartHeartbeatPoll();
 	}
 
 	void OpenConnections(){
@@ -168,9 +193,9 @@ public class ThreadedServer : ThreadedJob{
 		/* Start Listening at the specified port */        
 		myList.Start();
 		
-		Debug.Log("The server is running at port" + TCP_Config.ConnectionPort + "...");    
-		Debug.Log("The local End point is  :" + myList.LocalEndpoint );
-		Debug.Log("Waiting for a connection.....");
+		UnityEngine.Debug.Log("The server is running at port" + TCP_Config.ConnectionPort + "...");    
+		UnityEngine.Debug.Log("The local End point is  :" + myList.LocalEndpoint );
+		UnityEngine.Debug.Log("Waiting for a connection.....");
 		
 		s = myList.AcceptSocket();
 		isServerConnected = true;
@@ -180,7 +205,7 @@ public class ThreadedServer : ThreadedJob{
 			//...because socket.Receive() is a blocking call.
 		s.ReceiveTimeout = socketTimeoutMS;
 
-		Debug.Log("CONNECTED!");
+		UnityEngine.Debug.Log("CONNECTED!");
 	}
 	
 	void CleanupConnections(){
@@ -195,19 +220,79 @@ public class ThreadedServer : ThreadedJob{
 			isServerConnected = false;
 		}
 		catch (Exception e) {
-			Debug.Log("Close Server Error....." + e.StackTrace);
+			UnityEngine.Debug.Log("Close Server Error....." + e.StackTrace);
 		}  
 	}
 
-					
+
+
+
+	//CLOCK ALIGNMENT!
+	/*
+        Task computer starts the process by sending "ALIGNCLOCK' request.
+        Control PC will send a sequence of SYNC messages which are echoed back to it
+        When it is complete, the Control PC will send a SYNCED message, which indicates 
+        it has completed the clock alignment and it is safe for task computer to proceed 
+        to the next step.
+		*/
+	void RequestClockAlignment(){
+
+		isSynced = false;
+
+		SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.ALIGNCLOCK, "", "");
+		UnityEngine.Debug.Log("REQUESTING ALIGN CLOCK");
+        
+		clockAlignmentStopwatch.Start();
+		numClockAlignmentTries = 0;
+
+	}
+
+	//after x seconds have passed, check if the clocks are aligned yet
+	int CheckClockAlignment(){
+		if(clockAlignmentStopwatch.ElapsedMilliseconds >= timeBetweenClockAlignmentTriesMS){
+			if(isSynced){
+				UnityEngine.Debug.Log("Sync Complete");
+				return 0;
+			}
+			else{ //if not synced yet, wait another .5 seconds
+				numClockAlignmentTries++;
+				clockAlignmentStopwatch.Reset();
+				clockAlignmentStopwatch.Start();
+				return -1;
+			}
+		}
+		return -1;
+	}
+
+
+
+
+
+
+
+
+
+	//MESSAGE SENDING AND RECEIVING
+
+	//send all "messages to send"
+	void SendMessages(){
+		UnityEngine.Debug.Log("SENDING MESSAGE: " + messagesToSend);
+		if(messagesToSend != ""){
+			SendMessage(messagesToSend);
+			messagesToSend = "";
+		}
+	}
+
+	//send a single message. don't call this on it's own.
+	//should use other methods (EchoMessage, SendEvent, etc.) to add messages to "messagesToSend"
 	void SendMessage(string message){
 		try{
 			ASCIIEncoding asen=new ASCIIEncoding();
 			s.Send(asen.GetBytes(message));
-			Debug.Log("\nSent Message: " + message);
+			UnityEngine.Debug.Log("\nSent Message: " + message);
 		}
 		catch (Exception e) {
-			Debug.Log("Send Message Error....." + e.StackTrace);
+			UnityEngine.Debug.Log("Send Message Error....." + e.StackTrace);
 		}
 	}
 
@@ -218,7 +303,7 @@ public class ThreadedServer : ThreadedJob{
 	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
 		//Format the message
 		//(from the python code:) TODO: Change to JSONRPC and add checksum
-		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
+		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime; //WHAT IS THIS MOD HERE?
 		string message = TCP_Config.MSG_START + t0 + TCP_Config.MSG_SEPARATOR + "ERROR" + TCP_Config.MSG_END;
 		
 		if (auxData.Length > 0){
@@ -243,7 +328,13 @@ public class ThreadedServer : ThreadedJob{
 		messagesToSend += message;
 		
 	}
-	
+
+	void CheckForMessages(){
+		String message = ReceiveMessageBuffer();
+		
+		ProcessMessageBuffer(message);
+	}
+
 	String ReceiveMessageBuffer(){
 		String messageBuffer = "";
 		try{
@@ -251,18 +342,18 @@ public class ThreadedServer : ThreadedJob{
 			byte[] b=new byte[100];
 
 			int k=s.Receive(b);
-			Debug.Log("Recieved something!");
+			UnityEngine.Debug.Log("Recieved something!");
 			if(k > 0){
 
 				for (int i=0; i<k; i++) {
 					messageBuffer += Convert.ToChar(b[i]);
 				}
 			}
-			Debug.Log (messageBuffer);
+			UnityEngine.Debug.Log (messageBuffer);
 		}
 
 		catch (Exception e) {
-			Debug.Log("Receive Message Error....." + e.StackTrace);
+			UnityEngine.Debug.Log("Receive Message Error....." + e.StackTrace);
 		}
 
 		return messageBuffer;
@@ -296,7 +387,7 @@ public class ThreadedServer : ThreadedJob{
 			int numMessages = separateMessages.Count;
 
 			for(int i = 0; i < numMessages; i++){
-				Debug.Log("SEPARATE MESSAGES " + i + ": " + separateMessages[i]);
+				UnityEngine.Debug.Log("SEPARATE MESSAGES " + i + ": " + separateMessages[i]);
 
 				//if it's the first element...
 				if(i == 0){
@@ -360,22 +451,21 @@ public class ThreadedServer : ThreadedJob{
 
 			for (int i = 0; i < splitMessage.Length; i++) {
 				switch (i) {
-					//CASES 0 & 5 are EMPTY STRINGS.
 					case 0:
 						t0 = splitMessage [i];
-						Debug.Log ("T0: " + t0);
+						UnityEngine.Debug.Log ("T0: " + t0);
 						break;
 					case 1:
 						id = splitMessage [i];
-						Debug.Log ("ID: " + id);
+						UnityEngine.Debug.Log ("ID: " + id);
 						break;
 					case 2:
 						data = splitMessage [i];
-						Debug.Log ("DATA: " + data);
+						UnityEngine.Debug.Log ("DATA: " + data);
 						break;
 					case 3:
 						aux = splitMessage [i];
-						Debug.Log ("AUX: " + aux);
+						UnityEngine.Debug.Log ("AUX: " + aux);
 						break;
 				}
 			}
@@ -386,8 +476,8 @@ public class ThreadedServer : ThreadedJob{
 					break;
 				case "SYNC":
 					//Sync received from Control PC
-					//Exho SYNC back to Control PC with high precision time so that clocks can be aligned
-					//TODO: do this.
+					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_Microseconds.ToString(), "");//'%020.0f' % GameClock.SystemTime_Microseconds); //TODO: WHAT IS THIS MOD HERE?
 					break;
 				case "SYNCED":
 					//Control PC is done with clock alignment
@@ -431,7 +521,7 @@ public class ThreadedServer : ThreadedJob{
 		if(hasSentFirstHeartbeat){
 			long t1 = GameClock.SystemTime_Milliseconds;
 			if ((t1 - firstBeat) > nextBeat ){
-				Debug.Log("HI HEARTBEAT");
+				UnityEngine.Debug.Log("HI HEARTBEAT");
 				nextBeat = nextBeat + intervalMS;
 				delta = t1 - lastBeat;
 				lastBeat = t1;
@@ -441,7 +531,7 @@ public class ThreadedServer : ThreadedJob{
 			}
 		}
 		else {
-			Debug.Log("HI FIRST HEARTBEAT");
+			UnityEngine.Debug.Log("HI FIRST HEARTBEAT");
 			firstBeat = GameClock.SystemTime_Milliseconds;
 			lastBeat = firstBeat;
 			nextBeat = intervalMS;
