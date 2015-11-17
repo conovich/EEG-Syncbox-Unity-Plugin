@@ -56,41 +56,12 @@ public class TCPServer : MonoBehaviour {
 
 	void GetInput(){
 		if(Input.GetKeyDown(KeyCode.M)){
-			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
+			myServer.SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
 		}
 	}
 
 	bool GetIsConnected(){
 		return myServer.isServerConnected;
-	}
-
-	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
-		//Format the message
-		//(from the python code:) TODO: Change to JSONRPC and add checksum
-		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
-		string message = TCP_Config.MSG_START + t0 + TCP_Config.MSG_SEPARATOR + "ERROR" + TCP_Config.MSG_END;
-		
-		if (auxData.Length > 0){
-			message = TCP_Config.MSG_START
-				+ t0 + TCP_Config.MSG_SEPARATOR
-					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
-					+ eventData + TCP_Config.MSG_SEPARATOR
-					+ auxData + TCP_Config.MSG_END;
-		}
-		else if( eventData.Length > 0){
-			message = TCP_Config.MSG_START
-				+ t0 + TCP_Config.MSG_SEPARATOR
-					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
-					+ eventData + TCP_Config.MSG_END;
-		}
-		else{
-			message = TCP_Config.MSG_START
-				+ t0 + TCP_Config.MSG_SEPARATOR
-					+ eventType.ToString() + TCP_Config.MSG_END;
-		}
-		
-		myServer.messagesToSend += message;
-		
 	}
 
 	void OnApplicationQuit(){
@@ -108,13 +79,7 @@ public class TCPServer : MonoBehaviour {
 
 
 
-
-
-
-
-
-
-
+//THREADED SERVER
 public class ThreadedServer : ThreadedJob{
 	public bool isRunning = false;
 
@@ -126,6 +91,8 @@ public class ThreadedServer : ThreadedJob{
 
 	Socket s;
 	TcpListener myList;
+
+	int socketTimeoutMS = 5; //TODO: what should I set this to?
 		
 	public ThreadedServer(){
 		
@@ -135,31 +102,51 @@ public class ThreadedServer : ThreadedJob{
 	{
 		isRunning = true;
 		// Do your threaded task. DON'T use the Unity API here
-		OpenConnections();
+		StartHeartbeatPoll();
 		while (isRunning) {
+			if(!isServerConnected){
+				OpenConnections();
+			}
 			TalkToClient();
 		}
 		CleanupConnections();
 	}
-
+	
 	void TalkToClient(){
 		try {
 			//OpenConnections();
 
+			//SEND HEARTBEAT
+			messagesToSend = "";
+			SendHeartbeatPolled();
+
+
+
 			String message = ReceiveMessageBuffer();
 			//SendMessage("String recieved by server.");
+
+			Debug.Log("SENDING MESSAGE: " + messagesToSend);
+			if(messagesToSend != ""){
+				SendMessage(messagesToSend);
+				messagesToSend = "";
+			}
+
 			ProcessMessageBuffer(message);
 
-			//TESTING THE ECHO TEST. ASSUMING MESSAGE == "Test Message"
+			Debug.Log("MAIN LOOP EXECUTED");
 
+			//ECHO TEST
+			/*
 			if(message != ""){
 
-				messagesToSend = "ECHO: " + message;
+				EchoMessage(message);
 
 				SendMessage(messagesToSend);
 				messagesToSend = "";
 
-			}
+			}*/
+
+
 
 			//CleanupConnections();
 			
@@ -187,6 +174,11 @@ public class ThreadedServer : ThreadedJob{
 		
 		s = myList.AcceptSocket();
 		isServerConnected = true;
+
+		//THIS IS VERY IMPORTANT.
+		//WITHOUT THIS, SOCKET WILL HANG ON THINGS LIKE RECEIVING MESSAGES IF THERE ARE NO NEW MESSAGES.
+			//...because socket.Receive() is a blocking call.
+		s.ReceiveTimeout = socketTimeoutMS;
 
 		Debug.Log("CONNECTED!");
 	}
@@ -218,13 +210,48 @@ public class ThreadedServer : ThreadedJob{
 			Debug.Log("Send Message Error....." + e.StackTrace);
 		}
 	}
+
+	void EchoMessage(string message){
+		messagesToSend += ("ECHO: " + message);
+	}
+
+	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
+		//Format the message
+		//(from the python code:) TODO: Change to JSONRPC and add checksum
+		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime;
+		string message = TCP_Config.MSG_START + t0 + TCP_Config.MSG_SEPARATOR + "ERROR" + TCP_Config.MSG_END;
+		
+		if (auxData.Length > 0){
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
+					+ eventData + TCP_Config.MSG_SEPARATOR
+					+ auxData + TCP_Config.MSG_END;
+		}
+		else if( eventData.Length > 0){
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_SEPARATOR
+					+ eventData + TCP_Config.MSG_END;
+		}
+		else{
+			message = TCP_Config.MSG_START
+				+ t0 + TCP_Config.MSG_SEPARATOR
+					+ eventType.ToString() + TCP_Config.MSG_END;
+		}
+		
+		messagesToSend += message;
+		
+	}
 	
 	String ReceiveMessageBuffer(){
 		String messageBuffer = "";
 		try{
+
 			byte[] b=new byte[100];
+
 			int k=s.Receive(b);
-			Debug.Log("Recieved...");
+			Debug.Log("Recieved something!");
 			if(k > 0){
 
 				for (int i=0; i<k; i++) {
@@ -377,6 +404,57 @@ public class ThreadedServer : ThreadedJob{
 
 	}
 
+
+	//HEARTBEAT
+	bool isHeartbeat = false;
+	bool hasSentFirstHeartbeat = false;
+	long firstBeat = 0;
+	long nextBeat = 0;
+	long lastBeat = 0;
+	long intervalMS = 1000;
+	long delta = 0; //is this ever used?
+
+	void StartHeartbeatPoll(){
+		isHeartbeat = true;
+		hasSentFirstHeartbeat = false;
+	}
+
+	void StopHeartbeatPoll(){
+		isHeartbeat = false;
+	}
+
+	void SendHeartbeatPolled(){
+		//Send continuous heartbeat events every 'intervalMillis'
+		//The computation assures that the average interval between heartbeats will be intervalMillis rather...
+		//...than intervalMillis + some amount of computational overhead because it is relative to a fixed t0.
+
+		if(hasSentFirstHeartbeat){
+			long t1 = GameClock.SystemTime_Milliseconds;
+			if ((t1 - firstBeat) > nextBeat ){
+				Debug.Log("HI HEARTBEAT");
+				nextBeat = nextBeat + intervalMS;
+				delta = t1 - lastBeat;
+				lastBeat = t1;
+				lastBeat = 0;
+				SendEvent(lastBeat, TCP_Config.EventType.HEARTBEAT, intervalMS.ToString(), "");
+				//SendMessage("HEARTBEAT");
+			}
+		}
+		else {
+			Debug.Log("HI FIRST HEARTBEAT");
+			firstBeat = GameClock.SystemTime_Milliseconds;
+			lastBeat = firstBeat;
+			nextBeat = intervalMS;
+			lastBeat = 0;
+			SendEvent(lastBeat, TCP_Config.EventType.HEARTBEAT, intervalMS.ToString(), "");
+			//SendMessage("HEARTBEAT");
+			hasSentFirstHeartbeat = true;
+		}
+	}
+
+
+
+	//FINISHING/ENDING THE THREAD
 	protected override void OnFinished()
 	{
 		// This is executed by the Unity main thread when the job is finished
