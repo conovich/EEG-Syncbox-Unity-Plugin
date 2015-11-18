@@ -174,7 +174,7 @@ public class ThreadedServer : ThreadedJob{
 		//send subject ID
 		SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName, "");
 
-		//align clocks //TODO: SHOULD THIS BE FINISHED BEFORE WE START SENDING HEARTBEATS?
+		//align clocks //TODO: SHOULD THIS BE FINISHED BEFORE WE START SENDING HEARTBEATS? -- NO
 		RequestClockAlignment();
 
 		//start heartbeat

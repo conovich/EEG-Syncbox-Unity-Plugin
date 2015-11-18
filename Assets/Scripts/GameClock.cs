@@ -17,7 +17,8 @@ public class GameClock : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		long ms = SystemTime_Milliseconds;
+		long micros = SystemTime_Microseconds;
 	}
 	
 	// Update is called once per frame
@@ -30,19 +31,25 @@ public class GameClock : MonoBehaviour {
 	}
 
 	static long GetSystemClockMilliseconds(){
-		long tick = DateTime.Now.Ticks;
+		long ticks = DateTime.Now.Ticks;
 		//Debug.Log (DateTime.Now.Ticks);
 		//Debug.Log (DateTime.Now);
 		
 		//long seconds = tick / TimeSpan.TicksPerSecond;
-		long milliseconds = tick / TimeSpan.TicksPerMillisecond;
+		long milliseconds = ticks / TimeSpan.TicksPerMillisecond;
 
 		return milliseconds;
 	}
 
 	static long GetSystemClockMicroseconds(){
 		//Convenience method to return the system time.
-		return GameClock.SystemTime_Milliseconds * 1000; //TODO: this isn't really gonna work.
+		//return GameClock.SystemTime_Milliseconds * 1000; //TODO: this isn't really gonna work.l
+
+		long ticks = DateTime.Now.Ticks;
+
+		//string microseconds = DateTime.Now.ToString("HH:mm:ss.ffffff");
+		long microseconds = ticks / (TimeSpan.TicksPerMillisecond / 1000);
+		return microseconds;
 	}
 
 }
