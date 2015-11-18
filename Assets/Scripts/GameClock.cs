@@ -8,6 +8,9 @@ public class GameClock : MonoBehaviour {
 	public static long SystemTime_Milliseconds { get { return GetSystemClockMilliseconds (); } }
 	public static long SystemTime_Microseconds { get { return GetSystemClockMicroseconds (); } }
 
+	public static string SystemTime_MillisecondsString { get { return FormatTime (SystemTime_Milliseconds); } }
+	public static string SystemTime_MicrosecondsString { get { return FormatTime (SystemTime_Microseconds); } }
+
 	protected long microseconds = 1;
 	long initialSystemClockMilliseconds;
 
@@ -17,8 +20,7 @@ public class GameClock : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		long ms = SystemTime_Milliseconds;
-		long micros = SystemTime_Microseconds;
+
 	}
 	
 	// Update is called once per frame
@@ -50,6 +52,18 @@ public class GameClock : MonoBehaviour {
 		//string microseconds = DateTime.Now.ToString("HH:mm:ss.ffffff");
 		long microseconds = ticks / (TimeSpan.TicksPerMillisecond / 1000);
 		return microseconds;
+	}
+
+	static string GetFormattedMillisecondsAsString(){
+		return FormatTime(SystemTime_Milliseconds);
+	}
+
+	static string GetFormattedMicrosecondsAsString(){
+		return FormatTime(SystemTime_Microseconds);
+	}
+
+	public static string FormatTime(long time){
+		return time.ToString().PadLeft(20, '0');
 	}
 
 }

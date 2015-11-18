@@ -303,7 +303,7 @@ public class ThreadedServer : ThreadedJob{
 	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
 		//Format the message
 		//(from the python code:) TODO: Change to JSONRPC and add checksum
-		string t0 = systemTime.ToString();//TODO: "%020.0f" % systemTime; //WHAT IS THIS MOD HERE?
+		string t0 = GameClock.FormatTime(systemTime);
 		string message = TCP_Config.MSG_START + t0 + TCP_Config.MSG_SEPARATOR + "ERROR" + TCP_Config.MSG_END;
 		
 		if (auxData.Length > 0){
@@ -477,7 +477,7 @@ public class ThreadedServer : ThreadedJob{
 				case "SYNC":
 					//Sync received from Control PC
 					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
-					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_Microseconds.ToString(), "");//'%020.0f' % GameClock.SystemTime_Microseconds); //TODO: WHAT IS THIS MOD HERE?
+					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
 					break;
 				case "SYNCED":
 					//Control PC is done with clock alignment
