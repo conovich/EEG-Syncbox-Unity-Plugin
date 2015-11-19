@@ -29,7 +29,8 @@ public class SyncboxInput : MonoBehaviour {
 	private static extern IntPtr StimPulse(float durationSeconds, float freqHz, bool doRelay);
 	
 	public bool ShouldPulse = false;
-	public float PulseIntervalSeconds;
+	public float PulseOnSeconds;
+	public float PulseOffSeconds;
 	public TextMesh DownCircle;
 	public Color DownColor;
 	public Color UpColor;
@@ -95,12 +96,15 @@ public class SyncboxInput : MonoBehaviour {
 	}
 
 	IEnumerator Pulse (){
+		yield return new WaitForSeconds(TCP_Config.numSecondsBeforeAlignment);
 		while (true) {
 			if(ShouldPulse){
 				ToggleOn();
-				yield return new WaitForSeconds(PulseIntervalSeconds);
+				TCPServer.Instance.LogSYNCBOX(GameClock.SystemTime_Milliseconds, true);
+				yield return new WaitForSeconds(PulseOnSeconds);
 				ToggleOff();
-				yield return new WaitForSeconds(PulseIntervalSeconds);
+				TCPServer.Instance.LogSYNCBOX(GameClock.SystemTime_Milliseconds, false);
+				yield return new WaitForSeconds(PulseOffSeconds);
 			}
 			else{
 				yield return 0;

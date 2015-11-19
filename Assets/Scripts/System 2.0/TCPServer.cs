@@ -79,6 +79,27 @@ public class TCPServer : MonoBehaviour {
 
 	void Start(){
 		RunServer ();
+
+		StartCoroutine(AlignClocks());
+		StartCoroutine(SendPhase());
+	}
+
+	//test clock alignment, every x seconds
+	IEnumerator AlignClocks(){
+		yield return new WaitForSeconds(TCP_Config.numSecondsBeforeAlignment);
+		while(true){
+			myServer.RequestClockAlignment();
+			yield return new WaitForSeconds(10.0f);
+		}
+	}
+
+	//test encoding phase, every x seconds
+	IEnumerator SendPhase(){
+		yield return new WaitForSeconds(TCP_Config.numSecondsBeforeAlignment);
+		while(true){
+			myServer.SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.PHASE, "ENCODING", "");
+			yield return new WaitForSeconds(10.0f);
+		}
 	}
 
 	void RunServer () {
@@ -98,6 +119,17 @@ public class TCPServer : MonoBehaviour {
 
 	public void Log(long time, TCP_Config.EventType eventType){
 		simpleLog.Log(time, eventType.ToString());
+		UnityEngine.Debug.Log("Logging!");
+	}
+
+	//TODO: MOVE ELSEWHERE.
+	public void LogSYNCBOX(long time, bool isOn){
+		if(isOn){
+			simpleLog.Log(time, "SYNCBOX ON");
+		}
+		else{
+			simpleLog.Log(time, "SYNCBOX OFF");
+		}
 		UnityEngine.Debug.Log("Logging!");
 	}
 
@@ -285,7 +317,7 @@ public class ThreadedServer : ThreadedJob{
         it has completed the clock alignment and it is safe for task computer to proceed 
         to the next step.
 		*/
-	void RequestClockAlignment(){
+	public void RequestClockAlignment(){
 
 		clockAlignmentStopwatch = new Stopwatch();
 
