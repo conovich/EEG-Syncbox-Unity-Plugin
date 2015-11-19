@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.IO;
 
 using System;
 using System.Text;
@@ -14,6 +15,12 @@ using System.Diagnostics;
 using System.Threading;
 
 public class TCPServer : MonoBehaviour {
+
+	//logging
+	private string simpleLogFile; //gets set based on the current subject in Awake()
+	public Logger_Threading simpleLog;
+
+
 
 	ThreadedServer myServer;
 	bool isConnected { get { return GetIsConnected(); } }
@@ -40,6 +47,34 @@ public class TCPServer : MonoBehaviour {
 			return;
 		}
 		_instance = this;
+
+
+		InitLogging();
+	}
+
+	//TODO: move to logger_threading perhaps? *shrug*
+	void InitLogging(){
+		simpleLogFile = "TextFiles/" + TCP_Config.SubjectName + "Log";
+		
+		int logFileID = 0;
+		string logFileIDString = "000";
+		
+		while(File.Exists(simpleLog.fileName) || logFileID == 0){
+			//TODO: move this function somewhere else...?
+			if(logFileID < 10){
+				logFileIDString = "00" + logFileID;
+			}
+			else if (logFileID < 100){
+				logFileIDString = "0" + logFileID;
+			}
+			else{
+				logFileIDString = logFileID.ToString();
+			}
+			
+			simpleLog.fileName = simpleLogFile + "_" + logFileIDString + ".txt";
+			
+			logFileID++;
+		}
 	}
 
 	void Start(){
@@ -56,18 +91,33 @@ public class TCPServer : MonoBehaviour {
 	}
 
 	void GetInput(){
-		if(Input.GetKeyDown(KeyCode.M)){
+		/*if(Input.GetKeyDown(KeyCode.M)){
 			myServer.SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
-		}
+		}*/
+	}
+
+	public void Log(long time, TCP_Config.EventType eventType){
+		simpleLog.Log(time, eventType.ToString());
+		UnityEngine.Debug.Log("Logging!");
 	}
 
 	bool GetIsConnected(){
 		return myServer.isServerConnected;
 	}
 
+	public void OnExit(){ //call in scene controller when switching to another scene!
+		//if (ExperimentSettings_CoinTask.isLogging) {
+			simpleLog.close ();
+		//}
+	}
+
 	void OnApplicationQuit(){
 		myServer.End ();
 		UnityEngine.Debug.Log ("Ended server.");
+
+		//if (ExperimentSettings_CoinTask.isLogging) {
+			simpleLog.close ();
+		//}
 	}
 
 
@@ -88,7 +138,7 @@ public class ThreadedServer : ThreadedJob{
 	public bool isSynced = false;
 	Stopwatch clockAlignmentStopwatch;
 	int numClockAlignmentTries = 0;
-	const int timeBetweenClockAlignmentTriesMS = 500; //half a second
+	const int timeBetweenClockAlignmentTriesMS = 500;//500; //half a second
 	const int maxNumClockAlignmentTries = 120; //for a total of 60 seconds of attempted alignment
 
 
@@ -237,9 +287,12 @@ public class ThreadedServer : ThreadedJob{
 		*/
 	void RequestClockAlignment(){
 
+		clockAlignmentStopwatch = new Stopwatch();
+
 		isSynced = false;
 
 		SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.ALIGNCLOCK, "", "");
+		//SendEvent(0, TCP_Config.EventType.ALIGNCLOCK, "0", ""); //JUST FOR DEBUGGING
 		UnityEngine.Debug.Log("REQUESTING ALIGN CLOCK");
         
 		clockAlignmentStopwatch.Start();
@@ -252,6 +305,7 @@ public class ThreadedServer : ThreadedJob{
 		if(clockAlignmentStopwatch.ElapsedMilliseconds >= timeBetweenClockAlignmentTriesMS){
 			if(isSynced){
 				UnityEngine.Debug.Log("Sync Complete");
+				clockAlignmentStopwatch.Reset();
 				return 0;
 			}
 			else{ //if not synced yet, wait another .5 seconds
@@ -326,7 +380,8 @@ public class ThreadedServer : ThreadedJob{
 		}
 		
 		messagesToSend += message;
-		
+
+		TCPServer.Instance.Log(systemTime, eventType);
 	}
 
 	void CheckForMessages(){
@@ -535,9 +590,7 @@ public class ThreadedServer : ThreadedJob{
 				nextBeat = nextBeat + intervalMS;
 				delta = t1 - lastBeat;
 				lastBeat = t1;
-				lastBeat = 0;
 				SendEvent(lastBeat, TCP_Config.EventType.HEARTBEAT, intervalMS.ToString(), "");
-				//SendMessage("HEARTBEAT");
 			}
 		}
 		else {
@@ -545,9 +598,7 @@ public class ThreadedServer : ThreadedJob{
 			firstBeat = GameClock.SystemTime_Milliseconds;
 			lastBeat = firstBeat;
 			nextBeat = intervalMS;
-			lastBeat = 0;
 			SendEvent(lastBeat, TCP_Config.EventType.HEARTBEAT, intervalMS.ToString(), "");
-			//SendMessage("HEARTBEAT");
 			hasSentFirstHeartbeat = true;
 		}
 	}
