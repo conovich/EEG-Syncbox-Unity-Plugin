@@ -14,6 +14,8 @@ using System.Diagnostics;
 
 using System.Threading;
 
+using LitJson;
+
 public class TCPServer : MonoBehaviour {
 
 	//logging
@@ -115,6 +117,20 @@ public class TCPServer : MonoBehaviour {
 		/*if(Input.GetKeyDown(KeyCode.M)){
 			myServer.SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
 		}*/
+
+		if (Input.GetKeyDown (KeyCode.A)) {
+			myServer.SendSimpleJSONEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName);
+
+			myServer.SendSessionEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SESSION, 0, TCP_Config.SessionType.NO_STIM);
+
+			List<string> stateList = new List<string>();
+			stateList.Add("one");
+			stateList.Add("two");
+			stateList.Add("three");
+			myServer.SendDefineEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.DEFINE, stateList);
+
+			myServer.SendStateEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.STATE, "ENCODING", false);
+		}
 	}
 
 	public void Log(long time, TCP_Config.EventType eventType){
@@ -387,6 +403,7 @@ public class ThreadedServer : ThreadedJob{
 	}
 
 	public void SendEvent(long systemTime, TCP_Config.EventType eventType, string eventData, string auxData){
+
 		//Format the message
 		//(from the python code:) TODO: Change to JSONRPC and add checksum
 		string t0 = GameClock.FormatTime(systemTime);
@@ -415,6 +432,75 @@ public class ThreadedServer : ThreadedJob{
 
 		TCPServer.Instance.Log(systemTime, eventType);
 	}
+
+
+
+
+
+	public void SendSimpleJSONEvent(long systemTime, TCP_Config.EventType eventType, string eventData){
+		string t0 = GameClock.FormatTime(systemTime);
+		
+		string jsonEventString = JsonMessageController.FormatSimpleJSONEvent (t0, eventType.ToString(), eventData);
+		
+		string formattedMessage = FormatJSONMessage(jsonEventString);
+		
+		
+		UnityEngine.Debug.Log (formattedMessage);
+
+		messagesToSend += formattedMessage;
+		
+		TCPServer.Instance.Log(systemTime, eventType);
+	}
+
+	public void SendSessionEvent(long systemTime, TCP_Config.EventType eventType, int sessionNum, TCP_Config.SessionType sessionType){
+		string t0 = GameClock.FormatTime(systemTime);
+
+		string jsonEventString = JsonMessageController.FormatJSONSessionEvent (t0, sessionNum.ToString(), sessionType.ToString());
+		
+		string formattedMessage = FormatJSONMessage(jsonEventString);
+
+		UnityEngine.Debug.Log (formattedMessage);
+		
+		messagesToSend += formattedMessage;
+		
+		TCPServer.Instance.Log(systemTime, eventType);
+	}
+
+	public void SendDefineEvent(long systemTime, TCP_Config.EventType eventType, List<string> stateList){
+		string t0 = GameClock.FormatTime(systemTime);
+		
+		string jsonEventString = JsonMessageController.FormatJSONDefineEvent (t0, stateList);
+		
+		string formattedMessage = FormatJSONMessage(jsonEventString);
+		
+		UnityEngine.Debug.Log (formattedMessage);
+		
+		messagesToSend += formattedMessage;
+		
+		TCPServer.Instance.Log(systemTime, eventType);
+	}
+
+	public void SendStateEvent(long systemTime, TCP_Config.EventType eventType, string stateName, bool value){
+		string t0 = GameClock.FormatTime(systemTime);
+		
+		string jsonEventString = JsonMessageController.FormatJSONStateEvent (t0, stateName, value.ToString());
+		
+		string formattedMessage = FormatJSONMessage(jsonEventString);
+		
+		UnityEngine.Debug.Log (formattedMessage);
+		
+		messagesToSend += formattedMessage;
+		
+		TCPServer.Instance.Log(systemTime, eventType);
+	}
+
+	string FormatJSONMessage(string jsonMessage){
+		string message = TCP_Config.MSG_START.ToString() + jsonMessage + TCP_Config.MSG_END.ToString();
+		return message;
+	}
+
+
+
 
 	void CheckForMessages(){
 		String message = ReceiveMessageBuffer();
@@ -446,6 +532,73 @@ public class ThreadedServer : ThreadedJob{
 		return messageBuffer;
 	}
 
+
+
+
+	void DecodeJSONMessage(string jsonMessage){
+		JsonReader reader = new JsonReader (jsonMessage);
+		
+		while (reader.Read ()) {
+			
+			UnityEngine.Debug.Log (reader.Token);
+			UnityEngine.Debug.Log (reader.Value);
+			
+			switch ( (string)reader.Value ){
+				case "SUBJECTID":
+					//do nothing
+					break;
+					
+				case "SYNC":
+					//Sync received from Control PC
+					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
+					break;
+					
+				case "SYNCNP":
+					//Sync received from Control PC
+					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNCNP, GameClock.SystemTime_MicrosecondsString, "");
+					break;
+					
+				case "SYNCED":
+					//Control PC is done with clock alignment
+					isSynced = true;
+					break;
+					
+				case "EXIT":
+					break;
+			}
+		}
+	}
+
+	/*public void ProcessJSONMessageBuffer(string messageBuffer){
+		string jsonData = @"*
+            {
+                ""SUBJECTID""     : ""R1001P"",
+				""SESSION"": {
+					""session_number"" : 0, 
+					""session_type"" : [ 
+						""CLOSED_STIM"", 
+						""OPEN_STIM"", 
+						""NO_STIM"" 
+					] 
+				}
+            }^";
+
+		ProcessMessageBuffer (jsonData + jsonData);
+	}*/
+	    
+
+
+
+
+
+
+
+
+
+
+	//should work with JSON now... sort of.
 	void ProcessMessageBuffer(string messageBuffer){
 		//DEALS WITH MESSAGES GETTING CUT IN HALF AND SUCH. TODO: I'm guessing this could be refactored...
 
