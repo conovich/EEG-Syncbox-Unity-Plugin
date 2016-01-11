@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using LitJson;
 using System;
+using System.Text;
 
 using System.Text.RegularExpressions;
 
@@ -55,57 +56,100 @@ public class JsonMessageController : MonoBehaviour {
 	}
 
 	public static string FormatJSONSessionEvent(string time, string sessionNum, string sessionType){
-		string json = @"
-          {
-			""data"" : {
-				""session_number""   :" + sessionNum + @",
-            	""session_type"" :" + sessionType + @"
-			},
-			""type"" : ""SESSION"",
-			""time"" : " + time + @"
-          }
-        ";
+		StringBuilder sb = new StringBuilder();
+		JsonWriter writer = new JsonWriter(sb);
 
-		return json;
+		writer.WriteObjectStart();
+		writer.WritePropertyName("data");
+
+		//data object content
+		writer.WriteObjectStart();
+
+		writer.WritePropertyName("session_number");
+		writer.Write(sessionNum);
+
+		writer.WritePropertyName("session_type");
+		writer.Write(sessionType);
+
+		writer.WriteObjectEnd();
+
+
+		//type
+		writer.WritePropertyName ("type");
+		writer.Write ("SESSION");
+
+		//time
+		writer.WritePropertyName ("time");
+		writer.Write (time);
+
+
+		writer.WriteObjectEnd ();
+
+		return sb.ToString ();
 	}
 
 	public static string FormatJSONDefineEvent(string time, List<string> stateList){
-		string dataListSeparator = @",";
-
-		string json = @"
-          {
-			""data"" : [";
-
+		StringBuilder sb = new StringBuilder();
+		JsonWriter writer = new JsonWriter(sb);
+		
+		writer.WriteObjectStart();
+		writer.WritePropertyName("data");
+		
+		//data object content
+		writer.WriteArrayStart();
+		
 		for (int i = 0; i < stateList.Count; i++) {
-			json = json + stateList[i];
-			//add a comma if it's not the last item in the list
-			if(i != stateList.Count - 1){
-				json += dataListSeparator;
-			}
+			writer.Write(stateList[i]);
 		}
-
-		json += @"
-			],
-			""type"" : ""DEFINE"",
-			""time"" : " + time + @"
-          }
-        ";
-
-		return json;
+		
+		writer.WriteArrayEnd();
+		
+		
+		//type
+		writer.WritePropertyName ("type");
+		writer.Write ("DEFINE");
+		
+		//time
+		writer.WritePropertyName ("time");
+		writer.Write (time);
+		
+		
+		writer.WriteObjectEnd ();
+		
+		return sb.ToString ();
 	}
 
 	public static string FormatJSONStateEvent(string time, string stateName, string boolValue){
-		string json = @"
-          {
-			""data"" : {
-				""statename""   :" + stateName + @",
-            	""value"" :" + boolValue + @"
-			},
-			""type"" : ""STATE"",
-			""time"" : " + time + @"
-          }
-        ";
+		StringBuilder sb = new StringBuilder();
+		JsonWriter writer = new JsonWriter(sb);
+		
+		writer.WriteObjectStart();
+		writer.WritePropertyName("data");
+		
+		//data object content
+		writer.WriteObjectStart();
+		
+		writer.WritePropertyName("statename");
+		writer.Write(stateName);
+		
+		writer.WritePropertyName("value");
+		writer.Write(boolValue);
+		
+		writer.WriteObjectEnd();
+		
+		
+		//type
+		writer.WritePropertyName ("type");
+		writer.Write ("SESSION");
+		
+		//time
+		writer.WritePropertyName ("time");
+		writer.Write (time);
+		
+		
+		writer.WriteObjectEnd ();
+		
+		return sb.ToString ();
 
-		return json;
 	}
 }

@@ -119,17 +119,20 @@ public class TCPServer : MonoBehaviour {
 		}*/
 
 		if (Input.GetKeyDown (KeyCode.A)) {
-			myServer.SendSimpleJSONEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName);
+			string debugMessageBuffer = "";
+			//debugMessageBuffer += myServer.SendSimpleJSONEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName);
 
-			myServer.SendSessionEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SESSION, 0, TCP_Config.SessionType.NO_STIM);
+			debugMessageBuffer += myServer.SendSessionEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SESSION, 0, TCP_Config.SessionType.NO_STIM);
 
 			List<string> stateList = new List<string>();
 			stateList.Add("one");
 			stateList.Add("two");
 			stateList.Add("three");
-			myServer.SendDefineEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.DEFINE, stateList);
+			debugMessageBuffer += myServer.SendDefineEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.DEFINE, stateList);
 
-			myServer.SendStateEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.STATE, "ENCODING", false);
+			debugMessageBuffer += myServer.SendStateEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.STATE, "ENCODING", false);
+
+			myServer.ProcessJSONMessageBuffer(debugMessageBuffer);
 		}
 	}
 
@@ -437,66 +440,60 @@ public class ThreadedServer : ThreadedJob{
 
 
 
-	public void SendSimpleJSONEvent(long systemTime, TCP_Config.EventType eventType, string eventData){
+	public string SendSimpleJSONEvent(long systemTime, TCP_Config.EventType eventType, string eventData){
 		string t0 = GameClock.FormatTime(systemTime);
 		
 		string jsonEventString = JsonMessageController.FormatSimpleJSONEvent (t0, eventType.ToString(), eventData);
 		
-		string formattedMessage = FormatJSONMessage(jsonEventString);
+		UnityEngine.Debug.Log (jsonEventString);
 		
-		
-		UnityEngine.Debug.Log (formattedMessage);
-
-		messagesToSend += formattedMessage;
+		messagesToSend += jsonEventString;
 		
 		TCPServer.Instance.Log(systemTime, eventType);
+		
+		return jsonEventString;
 	}
 
-	public void SendSessionEvent(long systemTime, TCP_Config.EventType eventType, int sessionNum, TCP_Config.SessionType sessionType){
+	public string SendSessionEvent(long systemTime, TCP_Config.EventType eventType, int sessionNum, TCP_Config.SessionType sessionType){
 		string t0 = GameClock.FormatTime(systemTime);
 
 		string jsonEventString = JsonMessageController.FormatJSONSessionEvent (t0, sessionNum.ToString(), sessionType.ToString());
 		
-		string formattedMessage = FormatJSONMessage(jsonEventString);
-
-		UnityEngine.Debug.Log (formattedMessage);
+		UnityEngine.Debug.Log (jsonEventString);
 		
-		messagesToSend += formattedMessage;
+		messagesToSend += jsonEventString;
 		
 		TCPServer.Instance.Log(systemTime, eventType);
+		
+		return jsonEventString;
 	}
 
-	public void SendDefineEvent(long systemTime, TCP_Config.EventType eventType, List<string> stateList){
+	public string SendDefineEvent(long systemTime, TCP_Config.EventType eventType, List<string> stateList){
 		string t0 = GameClock.FormatTime(systemTime);
 		
 		string jsonEventString = JsonMessageController.FormatJSONDefineEvent (t0, stateList);
 		
-		string formattedMessage = FormatJSONMessage(jsonEventString);
+		UnityEngine.Debug.Log (jsonEventString);
 		
-		UnityEngine.Debug.Log (formattedMessage);
-		
-		messagesToSend += formattedMessage;
+		messagesToSend += jsonEventString;
 		
 		TCPServer.Instance.Log(systemTime, eventType);
+		
+		return jsonEventString;
 	}
 
-	public void SendStateEvent(long systemTime, TCP_Config.EventType eventType, string stateName, bool value){
+	public string SendStateEvent(long systemTime, TCP_Config.EventType eventType, string stateName, bool value){
 		string t0 = GameClock.FormatTime(systemTime);
 		
 		string jsonEventString = JsonMessageController.FormatJSONStateEvent (t0, stateName, value.ToString());
+
+		UnityEngine.Debug.Log (jsonEventString);
 		
-		string formattedMessage = FormatJSONMessage(jsonEventString);
-		
-		UnityEngine.Debug.Log (formattedMessage);
-		
-		messagesToSend += formattedMessage;
+		messagesToSend += jsonEventString;
 		
 		TCPServer.Instance.Log(systemTime, eventType);
-	}
 
-	string FormatJSONMessage(string jsonMessage){
-		string message = TCP_Config.MSG_START.ToString() + jsonMessage + TCP_Config.MSG_END.ToString();
-		return message;
+		return jsonEventString;
 	}
 
 
@@ -537,37 +534,56 @@ public class ThreadedServer : ThreadedJob{
 
 	void DecodeJSONMessage(string jsonMessage){
 		JsonReader reader = new JsonReader (jsonMessage);
-		
+
+		string dataContent = "";
+		string timeContent = "";
+		string typeContent = "";
+
+		string lastValue = "";
 		while (reader.Read ()) {
 			
 			UnityEngine.Debug.Log (reader.Token);
 			UnityEngine.Debug.Log (reader.Value);
-			
-			switch ( (string)reader.Value ){
-				case "SUBJECTID":
-					//do nothing
-					break;
-					
-				case "SYNC":
-					//Sync received from Control PC
-					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
-					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
-					break;
-					
-				case "SYNCNP":
-					//Sync received from Control PC
-					//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
-					SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNCNP, GameClock.SystemTime_MicrosecondsString, "");
-					break;
-					
-				case "SYNCED":
-					//Control PC is done with clock alignment
-					isSynced = true;
-					break;
-					
-				case "EXIT":
-					break;
+
+			switch (lastValue){
+			case "data":
+				dataContent = (string)reader.Value;
+				break;
+			case "type":
+				typeContent = (string)reader.Value;
+				break;
+			case "time":
+				timeContent = (string)reader.Value;
+				break;
 			}
+
+			lastValue = (string)reader.Value;
+		}
+
+		switch ( typeContent ){
+		case "SUBJECTID":
+			//do nothing
+			break;
+			
+		case "SYNC":
+			//Sync received from Control PC
+			//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
+			break;
+			
+		case "SYNCNP":
+			//Sync received from Control PC
+			//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNCNP, GameClock.SystemTime_MicrosecondsString, "");
+			break;
+			
+		case "SYNCED":
+			//Control PC is done with clock alignment
+			isSynced = true;
+			break;
+			
+		case "EXIT":
+			break;
 		}
 	}
 
@@ -589,16 +605,57 @@ public class ThreadedServer : ThreadedJob{
 	}*/
 	    
 
+	//CURRENTLY ASSUMING MESSAGES AREN'T GETTING SPLIT IN HALF.
+	public void ProcessJSONMessageBuffer(string messageBuffer){
+
+		if (messageBuffer != "") {
+
+			char[] individualCharacters = messageBuffer.ToCharArray();
+
+			int numOpenCharacter = 0;
+			int numCloseCharacter = 0;
+			string message = "";
+			for(int i = 0; i <individualCharacters.Length; i++){
+				if(incompleteMessage != ""){
+					numOpenCharacter = incompleteMessage.Split(TCP_Config.MSG_START).Length - 1;
+					numCloseCharacter = incompleteMessage.Split(TCP_Config.MSG_END).Length - 1;
+				}
+
+				if(individualCharacters[i] == TCP_Config.MSG_START){
+					numOpenCharacter++;
+				}
+				else if(individualCharacters[i] == TCP_Config.MSG_END && numOpenCharacter > numCloseCharacter){ //close character should never come before open character(s)
+					numCloseCharacter++;
+				}
+
+				message += individualCharacters[i].ToString();
+
+				if(numOpenCharacter == numCloseCharacter && numOpenCharacter > 0){ //END OF MESSAGE!
+					UnityEngine.Debug.Log("DECODE MESSAGE: " + message);
+					DecodeJSONMessage(message);
+
+					//reset variables
+					message = "";
+
+					numOpenCharacter = 0;
+					numCloseCharacter = 0;
+				}
+				//if we're on the last character and num open != num close, we have an incomplete message!
+				else if (i == individualCharacters.Length - 1 && numOpenCharacter > 0){
+					incompleteMessage = message;
+					UnityEngine.Debug.Log("INCOMPLETE MESSAGE: " + incompleteMessage);
+				}
+
+			}
+		}
+	}
 
 
 
 
 
 
-
-
-
-	//should work with JSON now... sort of.
+	
 	void ProcessMessageBuffer(string messageBuffer){
 		//DEALS WITH MESSAGES GETTING CUT IN HALF AND SUCH. TODO: I'm guessing this could be refactored...
 
@@ -673,6 +730,7 @@ public class ThreadedServer : ThreadedJob{
 			}
 		}
 	}
+
 
 	void DecodeMessage(string message){
 		//...assumes we got here with a message in the correct form...

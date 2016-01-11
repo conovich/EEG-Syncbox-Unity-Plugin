@@ -9,9 +9,9 @@ public class TCP_Config : MonoBehaviour {
 	public static int ConnectionPort = 8888; //8001 for Mac Pro Desktop communication
 
 
-	public static char MSG_START = '*';
+	public static char MSG_START = '{';
 	public static char MSG_SEPARATOR = '~';
-	public static char MSG_END = '^';
+	public static char MSG_END = '}';
 
 	public static string ExpName = "System2.0Test";
 	public static string SubjectName = "FakeSubjectName";
