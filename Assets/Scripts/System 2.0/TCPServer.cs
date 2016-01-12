@@ -540,6 +540,11 @@ public class ThreadedServer : ThreadedJob{
 		string typeContent = "";
 
 		string lastValue = "";
+		string lastToken = "";
+
+		List<string> dataArray = new List<string>();
+		List<string> dataObject = new List<String>();
+
 		while (reader.Read ()) {
 			
 			UnityEngine.Debug.Log (reader.Token);
@@ -547,7 +552,20 @@ public class ThreadedServer : ThreadedJob{
 
 			switch (lastValue){
 			case "data":
-				dataContent = (string)reader.Value;
+				if(reader.Token.ToString() == "ObjectStart"){
+					//TODO: parse the object
+					while(reader.Read() && reader.Token.ToString() != "ObjectEnd"){
+						dataObject.Add((string)reader.Value);
+					}
+				}
+				else if (reader.Token.ToString() == "ArrayStart"){
+					while(reader.Read() && reader.Token.ToString() != "ArrayEnd"){
+						dataArray.Add((string)reader.Value);
+					}
+				}
+				else{
+					dataContent = (string)reader.Value;
+				}
 				break;
 			case "type":
 				typeContent = (string)reader.Value;
@@ -556,7 +574,7 @@ public class ThreadedServer : ThreadedJob{
 				timeContent = (string)reader.Value;
 				break;
 			}
-
+			lastToken = reader.Token.ToString(); //unnecessary?
 			lastValue = (string)reader.Value;
 		}
 
@@ -587,22 +605,6 @@ public class ThreadedServer : ThreadedJob{
 		}
 	}
 
-	/*public void ProcessJSONMessageBuffer(string messageBuffer){
-		string jsonData = @"*
-            {
-                ""SUBJECTID""     : ""R1001P"",
-				""SESSION"": {
-					""session_number"" : 0, 
-					""session_type"" : [ 
-						""CLOSED_STIM"", 
-						""OPEN_STIM"", 
-						""NO_STIM"" 
-					] 
-				}
-            }^";
-
-		ProcessMessageBuffer (jsonData + jsonData);
-	}*/
 	    
 
 	//CURRENTLY ASSUMING MESSAGES AREN'T GETTING SPLIT IN HALF.

@@ -140,7 +140,7 @@ public class JsonMessageController : MonoBehaviour {
 		
 		//type
 		writer.WritePropertyName ("type");
-		writer.Write ("SESSION");
+		writer.Write ("STATE");
 		
 		//time
 		writer.WritePropertyName ("time");
