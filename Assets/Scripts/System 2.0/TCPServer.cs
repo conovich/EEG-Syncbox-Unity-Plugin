@@ -576,30 +576,43 @@ public class ThreadedServer : ThreadedJob{
 			lastValue = (string)reader.Value;
 		}
 
-		switch ( typeContent ){
-		case "SUBJECTID":
-			//do nothing
-			break;
-			
-		case "SYNC":
-			//Sync received from Control PC
-			//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
-			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
-			break;
-			
-		case "SYNCNP":
-			//Sync received from Control PC
-			//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
-			SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNCNP, GameClock.SystemTime_MicrosecondsString, "");
-			break;
-			
-		case "SYNCED":
-			//Control PC is done with clock alignment
-			isSynced = true;
-			break;
-			
-		case "EXIT":
-			break;
+		switch (typeContent) {
+			case "SUBJECTID":
+				//do nothing
+				break;
+				
+			case "SYNC":
+				//Sync received from Control PC
+				//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+				SendEvent (GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNC, GameClock.SystemTime_MicrosecondsString, "");
+				break;
+				
+			case "SYNCNP":
+				//Sync received from Control PC
+				//Echo SYNC back to Control PC with high precision time so that clocks can be aligned
+				SendEvent (GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SYNCNP, GameClock.SystemTime_MicrosecondsString, "");
+				break;
+				
+			case "SYNCED":
+				//Control PC is done with clock alignment
+				isSynced = true;
+				break;
+				
+			case "EXIT":
+				//Control PC is exiting. If heartbeat is active, this is a premature abort.
+					/*
+						if self.isHeartbeat and self.abortCallback:
+	                        self.disconnect()
+	                        self.abortCallback(self.clock)
+						*/
+				if (isHeartbeat) {
+					//TODO: do this. am I supposed to check for a premature abort? does it matter? or just end it?
+					End ();
+				}
+				break;
+			default:
+				break;
+
 		}
 	}
 
