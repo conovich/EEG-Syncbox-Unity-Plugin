@@ -21,12 +21,6 @@ public class JsonMessageController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-
-		string json = @"
-            {
-                ""SUBJECTID""     : ""R1001P""
-            }";
-
 	}
 	
 	// Update is called once per frame

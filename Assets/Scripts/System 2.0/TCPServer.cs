@@ -29,7 +29,7 @@ public class TCPServer : MonoBehaviour {
 
 
 
-	int QUEUE_SIZE = 20;  //Blocks if the queue is full
+	//int QUEUE_SIZE = 20;  //Blocks if the queue is full
 
 
 	//SINGLETON
@@ -118,7 +118,7 @@ public class TCPServer : MonoBehaviour {
 			myServer.SendEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.INFO, "KEYPRESS MESSAGE TEST", "no aux to see here.");
 		}*/
 
-		if (Input.GetKeyDown (KeyCode.A)) {
+		/*if (Input.GetKeyDown (KeyCode.A)) {
 			string debugMessageBuffer = "";
 			//debugMessageBuffer += myServer.SendSimpleJSONEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.SUBJECTID, TCP_Config.SubjectName);
 
@@ -133,7 +133,7 @@ public class TCPServer : MonoBehaviour {
 			debugMessageBuffer += myServer.SendStateEvent(GameClock.SystemTime_Milliseconds, TCP_Config.EventType.STATE, "ENCODING", false);
 
 			myServer.ProcessJSONMessageBuffer(debugMessageBuffer);
-		}
+		}*/
 	}
 
 	public void Log(long time, TCP_Config.EventType eventType){
@@ -502,7 +502,7 @@ public class ThreadedServer : ThreadedJob{
 	void CheckForMessages(){
 		String message = ReceiveMessageBuffer();
 		
-		ProcessMessageBuffer(message);
+		ProcessJSONMessageBuffer(message);
 	}
 
 	String ReceiveMessageBuffer(){
@@ -540,15 +540,14 @@ public class ThreadedServer : ThreadedJob{
 		string typeContent = "";
 
 		string lastValue = "";
-		string lastToken = "";
 
 		List<string> dataArray = new List<string>();
 		List<string> dataObject = new List<String>();
 
 		while (reader.Read ()) {
 			
-			UnityEngine.Debug.Log (reader.Token);
-			UnityEngine.Debug.Log (reader.Value);
+			//UnityEngine.Debug.Log (reader.Token);
+			//UnityEngine.Debug.Log (reader.Value);
 
 			switch (lastValue){
 			case "data":
@@ -574,7 +573,6 @@ public class ThreadedServer : ThreadedJob{
 				timeContent = (string)reader.Value;
 				break;
 			}
-			lastToken = reader.Token.ToString(); //unnecessary?
 			lastValue = (string)reader.Value;
 		}
 
@@ -658,7 +656,7 @@ public class ThreadedServer : ThreadedJob{
 
 
 	
-	void ProcessMessageBuffer(string messageBuffer){
+	/*void ProcessMessageBuffer(string messageBuffer){
 		//DEALS WITH MESSAGES GETTING CUT IN HALF AND SUCH. TODO: I'm guessing this could be refactored...
 
 		string MSG_START_STRING = TCP_Config.MSG_START.ToString ();
@@ -731,9 +729,9 @@ public class ThreadedServer : ThreadedJob{
 				}
 			}
 		}
-	}
+	}*/
 
-
+	/*
 	void DecodeMessage(string message){
 		//...assumes we got here with a message in the correct form...
 
@@ -785,13 +783,13 @@ public class ThreadedServer : ThreadedJob{
 					break;
 				case "EXIT":
 					//Control PC is exiting. If heartbeat is active, this is a premature abort.
-
+*/
 					/*
 					if self.isHeartbeat and self.abortCallback:
                         self.disconnect()
                         self.abortCallback(self.clock)
 					*/
-					
+	/*
 					if(isHeartbeat){
 						//TODO: do this. am I supposed to check for a premature abort? does it matter? or just end it?
 						End ();
@@ -803,7 +801,7 @@ public class ThreadedServer : ThreadedJob{
 		}
 
 	}
-
+*/
 
 	//HEARTBEAT
 	bool isHeartbeat = false;
@@ -812,7 +810,7 @@ public class ThreadedServer : ThreadedJob{
 	long nextBeat = 0;
 	long lastBeat = 0;
 	long intervalMS = 1000;
-	long delta = 0; //is this ever used?
+	//long delta = 0; //is this ever used?
 
 	void StartHeartbeatPoll(){
 		isHeartbeat = true;
@@ -833,7 +831,7 @@ public class ThreadedServer : ThreadedJob{
 			if ((t1 - firstBeat) > nextBeat ){
 				UnityEngine.Debug.Log("HI HEARTBEAT");
 				nextBeat = nextBeat + intervalMS;
-				delta = t1 - lastBeat;
+				//delta = t1 - lastBeat;
 				lastBeat = t1;
 				SendEvent(lastBeat, TCP_Config.EventType.HEARTBEAT, intervalMS.ToString(), "");
 			}
